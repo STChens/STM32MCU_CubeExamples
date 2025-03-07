@@ -110,7 +110,7 @@
   */
 
 #include "stm32h5xx.h"
-#include "main.h"
+
 /**
   * @}
   */
@@ -250,8 +250,12 @@ void SystemInit(void)
   /* Disable all interrupts */
   RCC->CIER = 0U;
 
-  /* Configure the Vector Table location ------------------*/
-  SCB->VTOR = S_CODE_START; /* Vector Table Relocation in Internal FLASH */
+  /* Configure the Vector Table location add offset address ------------------*/
+  #ifdef VECT_TAB_SRAM
+    SCB->VTOR = SRAM1_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal SRAM */
+  #else
+    SCB->VTOR = FLASH_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal FLASH */
+  #endif /* VECT_TAB_SRAM */
 
   /* Check OPSR register to verify if there is an ongoing swap or option bytes update interrupted by a reset */
   reg_opsr = FLASH->OPSR & FLASH_OPSR_CODE_OP;

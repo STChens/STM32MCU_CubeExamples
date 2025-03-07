@@ -1,9 +1,8 @@
 /**
   ******************************************************************************
-  * @file    low_level_obkeys.h
+  * @file    stm32h5xx_nucleo_conf.h
   * @author  MCD Application Team
-  * @brief   Header for low_level_obkeys.c module
-  *
+  * @brief   STM32H5xx Nucleo board configuration file.
   ******************************************************************************
   * @attention
   *
@@ -18,8 +17,8 @@
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef LOW_LEVEL_OBKEYS_H
-#define LOW_LEVEL_OBKEYS_H
+#ifndef STM32H5XX_NUCLEO_CONF_H
+#define STM32H5XX_NUCLEO_CONF_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,22 +26,50 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32h5xx_hal.h"
-#define ARM_DRIVER_OK                 0 /*!< Operation succeeded */
-#define ARM_DRIVER_ERROR_SPECIFIC    -6 /*!< Start of driver specific errors */
 
-/* Exported constants --------------------------------------------------------*/
+/** @addtogroup BSP
+  * @{
+  */
 
-/* Exported types ------------------------------------------------------------*/
+/** @addtogroup STM32H5XX_NUCLEO
+  * @{
+  */
 
+/** @defgroup STM32H5XX_NUCLEO_CONFIG Config
+  * @{
+  */
 
-/* External variables --------------------------------------------------------*/
+/** @defgroup STM32H5XX_NUCLEO_CONFIG_Exported_Constants Exported Constants
+  * @{
+  */
+/* Nucleo pin and part number defines */
+#define USE_NUCLEO_144
 
-/* Exported macros -----------------------------------------------------------*/
-/* Exported functions ------------------------------------------------------- */
-int32_t OBK_Flash_ReadEncrypted(uint32_t Offset, void *pData, uint32_t Length);
+/* COM define */
+#define USE_COM_LOG                         1U
+#define USE_BSP_COM_FEATURE                 1U
+
+/* IRQ priorities */
+#define BSP_BUTTON_USER_IT_PRIORITY         15U
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* LOW_LEVEL_OBKEYS_H */
+#endif /* STM32H5XX_NUCLEO_CONF_H */
