@@ -32,7 +32,7 @@
                                                To enter it, press user button at reset.
                                       Undefined: Do not use system bootloader. */
 
-#define MCUBOOT_APP_IMAGE_NUMBER 2 /* 1: S and NS application binaries are assembled in one single image.
+#define MCUBOOT_APP_IMAGE_NUMBER 1 /* 1: S and NS application binaries are assembled in one single image.
                                       2: Two separated images for S and NS application binaries. */
 
 #define MCUBOOT_S_DATA_IMAGE_NUMBER 0   /* 1: S data image for S application.
@@ -44,7 +44,9 @@
 /*#define DEVICE_1M_FLASH_ENABLE */  /*Defined: the project is for 1M FLASH device
                                        Undefined: the project is for 2M FLASH device */
 /* Flash layout configuration : end ******************************************/
-
+#if (MCUBOOT_APP_IMAGE_NUMBER != 1)
+#error "Image number must be 1 because App is secure only!"
+#endif
 
 /* Total number of images */
 #define MCUBOOT_IMAGE_NUMBER (MCUBOOT_APP_IMAGE_NUMBER + MCUBOOT_S_DATA_IMAGE_NUMBER + MCUBOOT_NS_DATA_IMAGE_NUMBER)
@@ -64,34 +66,26 @@
 #define FLASH_AREA_IMAGE_SECTOR_SIZE    (0x2000)     /* 8 KB */
 #define FLASH_AREA_WRP_GROUP_SIZE       (0x8000)     /* 32 KB */
 #if defined(DEVICE_1M_FLASH_ENABLE)
-#define FLASH_B_SIZE                    (0x80000)   /* 512 KBytes*/
+#define FLASH_B_SIZE                    (0x40000)   /* 256 KBytes*/
 #else
-#define FLASH_B_SIZE                    (0x100000) /* 1 MBytes */
+#define FLASH_B_SIZE                    (0x80000) /* 256 MBytes */
 #endif /* DEVICE_1M_FLASH_ENABLE */
-#define FLASH_TOTAL_SIZE                (FLASH_B_SIZE+FLASH_B_SIZE) /* 1 MBytes  or 2MBytes*/
+#define FLASH_TOTAL_SIZE                (FLASH_B_SIZE+FLASH_B_SIZE) /* 512 KBytes*/
 #define FLASH_BASE_ADDRESS              (0x08000000)
 
 /* Flash area IDs */
 #define FLASH_AREA_0_ID                 (1)
-#if (MCUBOOT_APP_IMAGE_NUMBER == 2)
-#define FLASH_AREA_1_ID                 (2)
-#endif /* MCUBOOT_APP_IMAGE_NUMBER == 2 */
+
 #define FLASH_AREA_2_ID                 (3)
-#if (MCUBOOT_APP_IMAGE_NUMBER == 2)
-#define FLASH_AREA_3_ID                 (4)
-#endif /* MCUBOOT_APP_IMAGE_NUMBER == 2 */
+
 #if (MCUBOOT_S_DATA_IMAGE_NUMBER == 1)
 #define FLASH_AREA_4_ID                 (5)
 #endif /* MCUBOOT_S_DATA_IMAGE_NUMBER == 1 */
-#if (MCUBOOT_NS_DATA_IMAGE_NUMBER == 1)
-#define FLASH_AREA_5_ID                 (6)
-#endif /* MCUBOOT_NS_DATA_IMAGE_NUMBER == 1 */
+
 #if (MCUBOOT_S_DATA_IMAGE_NUMBER == 1)
 #define FLASH_AREA_6_ID                 (7)
 #endif /* MCUBOOT_S_DATA_IMAGE_NUMBER == 1 */
-#if (MCUBOOT_NS_DATA_IMAGE_NUMBER == 1)
-#define FLASH_AREA_7_ID                 (8)
-#endif /* MCUBOOT_NS_DATA_IMAGE_NUMBER == 1 */
+
 #define FLASH_AREA_SCRATCH_ID           (9)
 
 /* Offset and size definitions of the flash partitions that are handled by the
@@ -102,6 +96,10 @@
 /* area for BL2 code protected by hdp */
 #define FLASH_AREA_BL2_OFFSET           (0x0000)
 #define FLASH_AREA_BL2_SIZE             (0x18000)
+
+/* area for EDATA */
+#define FLASH_EDATA_AREA_SIZE   (0x2000) /* 8KB for EDATA */
+#define FLASH_EDATA_AREA_OFFSET         (FLASH_BASE_ADDRESS + FLASH_TOTAL_SIZE - FLASH_EDATA_AREA_SIZE)
 
 /* scratch area */
 #if defined(FLASH_AREA_SCRATCH_ID)
@@ -136,37 +134,22 @@
 #endif /* ((FLASH_AREA_BL2_OFFSET+FLASH_AREA_BL2_SIZE) % FLASH_AREA_WRP_GROUP_SIZE) != 0 */
 
 /* BL2 partitions size */
-#define FLASH_S_PARTITION_SIZE          (0x06000) /* 24 KB for S partition */
-#if defined(DEVICE_1M_FLASH_ENABLE)
-#define FLASH_NS_PARTITION_SIZE         (0x40000) /* 256 KB for NS partition */
-#else
-#define FLASH_NS_PARTITION_SIZE         (0xA0000) /* 640 KB for NS partition */
-#endif /* DEVICE_1M_FLASH_ENABLE */
+#define FLASH_S_PARTITION_SIZE          (0x80000) /* 512 KB for S partition */
+#define FLASH_NS_PARTITION_SIZE         (0x0) /* 0 KB for NS partition */
 #define FLASH_PARTITION_SIZE            (FLASH_S_PARTITION_SIZE+FLASH_NS_PARTITION_SIZE)
 
-#if (MCUBOOT_APP_IMAGE_NUMBER == 2)
-#define FLASH_MAX_APP_PARTITION_SIZE    ((FLASH_S_PARTITION_SIZE >   \
-                                         FLASH_NS_PARTITION_SIZE) ? \
-                                         FLASH_S_PARTITION_SIZE : \
-                                         FLASH_NS_PARTITION_SIZE)
-#else
+/* App FW slot size. 
+This value may change if the layout changes, in such case, please recalculate the size using the xlsx file */
+#define FLASH_S_ACTIVESLOT_SIZE         (0x2A000) /* 168 KB for Code slot of secure only app. */
+
 #define FLASH_MAX_APP_PARTITION_SIZE    FLASH_PARTITION_SIZE
-#endif /* (MCUBOOT_APP_IMAGE_NUMBER == 2) */
 #if (MCUBOOT_S_DATA_IMAGE_NUMBER == 1)
 #define FLASH_S_DATA_PARTITION_SIZE     (FLASH_AREA_IMAGE_SECTOR_SIZE)
 #else
 #define FLASH_S_DATA_PARTITION_SIZE     (0x0)
 #endif /* (MCUBOOT_S_DATA_IMAGE_NUMBER == 1) */
-#if (MCUBOOT_NS_DATA_IMAGE_NUMBER == 1)
-#define FLASH_NS_DATA_PARTITION_SIZE    (FLASH_AREA_IMAGE_SECTOR_SIZE)
-#else
-#define FLASH_NS_DATA_PARTITION_SIZE    (0x0)
-#endif /* (MCUBOOT_NS_DATA_IMAGE_NUMBER == 1) */
 
-#define FLASH_MAX_DATA_PARTITION_SIZE   ((FLASH_S_DATA_PARTITION_SIZE >   \
-                                         FLASH_NS_DATA_PARTITION_SIZE) ? \
-                                         FLASH_S_DATA_PARTITION_SIZE : \
-                                         FLASH_NS_DATA_PARTITION_SIZE)
+#define FLASH_MAX_DATA_PARTITION_SIZE   (FLASH_S_DATA_PARTITION_SIZE)
 #define FLASH_MAX_PARTITION_SIZE        ((FLASH_MAX_APP_PARTITION_SIZE >   \
                                          FLASH_MAX_DATA_PARTITION_SIZE) ? \
                                          FLASH_MAX_APP_PARTITION_SIZE : \
@@ -175,6 +158,27 @@
 /* BL2 flash areas */
 #define FLASH_AREA_BEGIN_OFFSET         (FLASH_AREA_SCRATCH_SIZE+FLASH_AREA_BL2_SIZE)
 #define FLASH_AREAS_DEVICE_ID           (FLASH_DEVICE_ID - FLASH_DEVICE_ID)
+
+/* FLASH_AREA_BEGIN_OFFSET :
+   Before FLASH_AREA_BEGIN_OFFSET is BL2 and Scratch area
+   Starting from FLASH_AREA_BEGIN_OFFSET is S data area, S code active slot and so on
+   Basically, all content that does not belong to Secure boot or managed by secure boot is starting from FLASH_AREA_BEGIN_OFFSET
+*/
+
+/* For SECURE ONLY APP use case, the possible slots following FLASH_AREA_BEGIN_OFFSET are
+   +----------+--------------------------------+-------------------------------+
+   | Area ID  |  Purpose                       |   Size                        |                 
+   +----------+--------------------------------+-------------------------------+
+   | 4        |  S data active slot            |   FLASH_S_DATA_PARTITION_SIZE |                 
+   +----------+--------------------------------+-------------------------------+
+   | 0        |  S App data active slot        |   FLASH_S_ACTIVESLOT_SIZE     |                 
+   +----------+--------------------------------+-------------------------------+
+   | 2        |  S App data download slot      |   FLASH_S_ACTIVESLOT_SIZE     |                 
+   +----------+--------------------------------+-------------------------------+
+   | 6        |  S data download slot          |   FLASH_S_DATA_PARTITION_SIZE |                 
+   +----------+--------------------------------+-------------------------------+
+   
+*/
 
 /* Secure data image primary slot */
 #if defined (FLASH_AREA_4_ID)
@@ -190,12 +194,15 @@
 #define FLASH_AREA_4_SIZE               (0x0)
 #endif /* FLASH_AREA_4_ID */
 
+/* External loader area */
+
+
 /* Secure app image primary slot */
 #if defined(FLASH_AREA_0_ID)
 #define FLASH_AREA_0_DEVICE_ID          (FLASH_AREAS_DEVICE_ID)
 #define FLASH_AREA_0_OFFSET             (FLASH_AREA_BEGIN_OFFSET + FLASH_AREA_4_SIZE)
 #if (MCUBOOT_APP_IMAGE_NUMBER == 2)
-#define FLASH_AREA_0_SIZE               (FLASH_S_PARTITION_SIZE)
+#define FLASH_AREA_0_SIZE               (FLASH_S_ACTIVESLOT_SIZE)
 #else
 #define FLASH_AREA_0_SIZE               (FLASH_PARTITION_SIZE)
 #endif /* (MCUBOOT_APP_IMAGE_NUMBER == 2) */
@@ -208,47 +215,13 @@
 #define FLASH_AREA_0_SIZE               (0x0)
 #endif /* FLASH_AREA_0_ID */
 
-/* Non-secure app image primary slot */
-#if defined(FLASH_AREA_1_ID)
-#define FLASH_AREA_1_DEVICE_ID          (FLASH_AREAS_DEVICE_ID)
-#define FLASH_AREA_1_OFFSET             (FLASH_AREA_BEGIN_OFFSET + FLASH_AREA_4_SIZE + \
-                                         FLASH_AREA_0_SIZE)
-#define FLASH_AREA_1_SIZE               (FLASH_NS_PARTITION_SIZE)
-/* Control Non-secure app image primary slot */
-#if (FLASH_AREA_1_OFFSET  % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0
-#error "FLASH_AREA_1_OFFSET  not aligned on FLASH_AREA_IMAGE_SECTOR_SIZE"
-#endif /* (FLASH_AREA_1_OFFSET  % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0  */
-#else /* FLASH_AREA_1_ID */
-#define FLASH_AREA_1_OFFSET             (0x0)
-#define FLASH_AREA_1_SIZE               (0x0)
-#endif /* FLASH_AREA_1_ID */
-
-/* Non-secure data image primary slot */
-#if defined(FLASH_AREA_5_ID)
-#define FLASH_AREA_5_DEVICE_ID          (FLASH_AREAS_DEVICE_ID)
-#define FLASH_AREA_5_OFFSET             (FLASH_AREA_BEGIN_OFFSET + FLASH_AREA_4_SIZE + \
-                                         FLASH_AREA_0_SIZE + FLASH_AREA_1_SIZE)
-#define FLASH_AREA_5_SIZE               (FLASH_NS_DATA_PARTITION_SIZE)
-/* Control Non-secure data image primary slot */
-#if (FLASH_AREA_5_OFFSET  % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0
-#error "FLASH_AREA_5_OFFSET  not aligned on FLASH_AREA_IMAGE_SECTOR_SIZE"
-#endif /* (FLASH_AREA_5_OFFSET  % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0  */
-#else /* FLASH_AREA_5_ID */
-#define FLASH_AREA_5_OFFSET             (0x0)
-#define FLASH_AREA_5_SIZE               (0x0)
-#endif /* FLASH_AREA_5_ID */
 
 /* Secure app image secondary slot */
 #if defined(FLASH_AREA_2_ID)
 #define FLASH_AREA_2_DEVICE_ID          (FLASH_AREAS_DEVICE_ID)
 #define FLASH_AREA_2_OFFSET             (FLASH_AREA_BEGIN_OFFSET + FLASH_AREA_4_SIZE + \
-                                         FLASH_AREA_0_SIZE + FLASH_AREA_1_SIZE + \
-                                         FLASH_AREA_5_SIZE)
-#if (MCUBOOT_APP_IMAGE_NUMBER == 2)
-#define FLASH_AREA_2_SIZE               (FLASH_S_PARTITION_SIZE)
-#else
-#define FLASH_AREA_2_SIZE               (FLASH_PARTITION_SIZE)
-#endif /* (MCUBOOT_APP_IMAGE_NUMBER == 2) */
+                                         FLASH_AREA_0_SIZE )
+#define FLASH_AREA_2_SIZE               (FLASH_S_ACTIVESLOT_SIZE)
 /* Control Secure app image secondary slot */
 #if (FLASH_AREA_2_OFFSET  % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0
 #error "FLASH_AREA_2_OFFSET  not aligned on FLASH_AREA_IMAGE_SECTOR_SIZE"
@@ -258,29 +231,12 @@
 #define FLASH_AREA_2_SIZE               (0x0)
 #endif /* FLASH_AREA_2_ID */
 
-/* Non-secure app image secondary slot */
-#if defined(FLASH_AREA_3_ID)
-#define FLASH_AREA_3_DEVICE_ID          (FLASH_AREAS_DEVICE_ID)
-#define FLASH_AREA_3_OFFSET             (FLASH_AREA_BEGIN_OFFSET + FLASH_AREA_4_SIZE + \
-                                         FLASH_AREA_0_SIZE + FLASH_AREA_1_SIZE + \
-                                         FLASH_AREA_5_SIZE + FLASH_AREA_2_SIZE)
-#define FLASH_AREA_3_SIZE               (FLASH_NS_PARTITION_SIZE)
-/* Control Non-Secure app image secondary slot */
-#if (FLASH_AREA_3_OFFSET  % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0
-#error "FLASH_AREA_3_OFFSET  not aligned on FLASH_AREA_IMAGE_SECTOR_SIZE"
-#endif /*  (FLASH_AREA_3_OFFSET  % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0 */
-#else /* FLASH_AREA_3_ID */
-#define FLASH_AREA_3_OFFSET             (0x0)
-#define FLASH_AREA_3_SIZE               (0x0)
-#endif /* FLASH_AREA_3_ID */
 
 /* Secure data image secondary slot */
 #if defined(FLASH_AREA_6_ID)
 #define FLASH_AREA_6_DEVICE_ID          (FLASH_AREAS_DEVICE_ID)
 #define FLASH_AREA_6_OFFSET             (FLASH_AREA_BEGIN_OFFSET + FLASH_AREA_4_SIZE + \
-                                         FLASH_AREA_0_SIZE + FLASH_AREA_1_SIZE + \
-                                         FLASH_AREA_5_SIZE + FLASH_AREA_2_SIZE + \
-                                         FLASH_AREA_3_SIZE)
+                                         FLASH_AREA_0_SIZE + FLASH_AREA_2_SIZE)
 #define FLASH_AREA_6_SIZE               (FLASH_S_DATA_PARTITION_SIZE)
 /* Control Secure data image secondary slot */
 #if (FLASH_AREA_6_OFFSET  % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0
@@ -291,29 +247,10 @@
 #define FLASH_AREA_6_SIZE               (0x0)
 #endif /* FLASH_AREA_6_ID */
 
-/* Non-Secure data image secondary slot */
-#if defined(FLASH_AREA_7_ID)
-#define FLASH_AREA_7_DEVICE_ID          (FLASH_AREAS_DEVICE_ID)
-#define FLASH_AREA_7_OFFSET             (FLASH_AREA_BEGIN_OFFSET + FLASH_AREA_4_SIZE + \
-                                         FLASH_AREA_0_SIZE + FLASH_AREA_1_SIZE + \
-                                         FLASH_AREA_5_SIZE + FLASH_AREA_2_SIZE + \
-                                         FLASH_AREA_3_SIZE + FLASH_AREA_6_SIZE)
-#define FLASH_AREA_7_SIZE               (FLASH_NS_DATA_PARTITION_SIZE)
-/* Control Non-Secure data image secondary slot */
-#if (FLASH_AREA_7_OFFSET  % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0
-#error "FLASH_AREA_7_OFFSET  not aligned on FLASH_AREA_IMAGE_SECTOR_SIZE"
-#endif /*  (FLASH_AREA_7_OFFSET  % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0 */
-#else /* FLASH_AREA_7_ID */
-#define FLASH_AREA_7_OFFSET             (0x0)
-#define FLASH_AREA_7_SIZE               (0x0)
-#endif /* FLASH_AREA_7_ID */
-
 /* flash areas end offset */
 #define FLASH_AREA_END_OFFSET           (FLASH_AREA_BEGIN_OFFSET + FLASH_AREA_4_SIZE + \
-                                         FLASH_AREA_0_SIZE + FLASH_AREA_1_SIZE + \
-                                         FLASH_AREA_5_SIZE + FLASH_AREA_2_SIZE + \
-                                         FLASH_AREA_3_SIZE + FLASH_AREA_6_SIZE + \
-                                         FLASH_AREA_7_SIZE)
+                                         FLASH_AREA_0_SIZE + FLASH_AREA_2_SIZE + \
+                                         FLASH_AREA_6_SIZE)
 /* Control flash area end */
 #if (FLASH_AREA_END_OFFSET  % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0
 #error "FLASH_AREA_END_OFFSET  not aligned on FLASH_AREA_IMAGE_SECTOR_SIZE"
@@ -333,11 +270,7 @@
                                            FLASH_AREA_IMAGE_SECTOR_SIZE)
 
 #define SECURE_IMAGE_OFFSET             (0x0)
-#define SECURE_IMAGE_MAX_SIZE           FLASH_S_PARTITION_SIZE
-
-#define NON_SECURE_IMAGE_OFFSET         (SECURE_IMAGE_OFFSET + SECURE_IMAGE_MAX_SIZE)
-#define NON_SECURE_IMAGE_MAX_SIZE       FLASH_NS_PARTITION_SIZE
-
+#define SECURE_IMAGE_MAX_SIZE           FLASH_S_ACTIVESLOT_SIZE
 
 /* Flash device name used by BL2 and NV Counter
  * Name is defined in flash driver file: low_level_flash.c
