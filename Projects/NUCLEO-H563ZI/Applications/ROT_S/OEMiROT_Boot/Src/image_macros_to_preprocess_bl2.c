@@ -115,9 +115,9 @@ enum image_attributes
   /* area for programming hardening on page */
 #if (FLASH_AREA_0_OFFSET+SECURE_IMAGE_MAX_SIZE) < (FLASH_B_SIZE)
   /* config without secure on bank 2 */
-  RE_BL2_SEC1_END = (FLASH_AREA_0_OFFSET+SECURE_IMAGE_MAX_SIZE-0x1),
-  RE_BL2_SEC2_START = (FLASH_B_SIZE-0x1),
-  RE_BL2_SEC2_END = (0x0),
+  RE_BL2_SEC1_END = (FLASH_B_SIZE-0x1),
+  RE_BL2_SEC2_END = (FLASH_B_SIZE-0x1),
+  RE_BL2_SEC2_START = (0x0),
 #else
   /* config with secure on bank 2 */
   RE_BL2_SEC1_END = (FLASH_B_SIZE-0x1),

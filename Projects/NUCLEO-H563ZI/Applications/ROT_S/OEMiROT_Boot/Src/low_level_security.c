@@ -778,6 +778,7 @@ void LL_SECU_CheckStaticProtections(void)
 #endif /* OEMIROT_ENABLE_SET_OB  */
     }
   }
+#if (FLASH_NS_PARTITION_SIZE > 0)  
   /* the bank 2 must be fully unsecure */
   else if (flash_option_bytes_bank2.WMSecEndSector >= flash_option_bytes_bank2.WMSecStartSector)
   {
@@ -793,7 +794,8 @@ void LL_SECU_CheckStaticProtections(void)
     flash_option_bytes_bank2.OptionType = OPTIONBYTE_WMSEC;
 #endif /* OEMIROT_ENABLE_SET_OB */
   }
-
+#endif /* (FLASH_NS_PARTITION_SIZE > 0) */
+  
 #ifdef  OEMIROT_WRP_PROTECT_ENABLE
   uint32_t val;
   /* Check flash write protection */

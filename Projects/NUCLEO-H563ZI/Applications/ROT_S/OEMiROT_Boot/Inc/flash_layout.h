@@ -134,7 +134,7 @@
 #endif /* ((FLASH_AREA_BL2_OFFSET+FLASH_AREA_BL2_SIZE) % FLASH_AREA_WRP_GROUP_SIZE) != 0 */
 
 /* BL2 partitions size */
-#define FLASH_S_PARTITION_SIZE          (0x80000) /* 512 KB for S partition */
+#define FLASH_S_PARTITION_SIZE          (0x80000 - FLASH_AREA_0_OFFSET) /* 512 KB for S partition */
 #define FLASH_NS_PARTITION_SIZE         (0x0) /* 0 KB for NS partition */
 #define FLASH_PARTITION_SIZE            (FLASH_S_PARTITION_SIZE+FLASH_NS_PARTITION_SIZE)
 

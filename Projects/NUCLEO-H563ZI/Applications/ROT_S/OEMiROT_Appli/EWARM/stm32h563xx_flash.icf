@@ -3,7 +3,7 @@
 /* IcfEditorFile="$TOOLKIT_DIR$\config\ide\IcfEditor\cortex_v1_0.xml" */
 /*-Specials-*/
 define symbol S_CODE_OFFSET = 0x00018000; /* Firmware execution area offset  */
-define symbol S_CODE_SIZE = 0x00029800; /* Firmware area size ==> Max up to 174 KB (0x2B800) */
+define symbol S_CODE_SIZE = 0x2a000; /* Firmware area size ==> Max up to 174 KB (0x2B800) */
 define exported symbol IMAGE_HEADER_SIZE = 0x400; /* mcuboot header size */
 
 define exported symbol __ICFEDIT_intvec_start__ = 0x0C000000 + S_CODE_OFFSET + IMAGE_HEADER_SIZE;

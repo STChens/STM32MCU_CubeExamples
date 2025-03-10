@@ -4,7 +4,7 @@ set "projectdir=%~dp0"
 pushd %projectdir%\..\..\..\..\ROT_Provisioning
 set provisioningdir=%cd%
 popd
-call "%provisioningdir%\env.bat"
+call "%provisioningdir%\env_sonlyapp.bat"
 
 :: Enable delayed expansion
 setlocal EnableDelayedExpansion
@@ -33,27 +33,25 @@ set "python= "
 :postbuild
 set "preprocess_bl2_file=%projectdir%\image_macros_preprocessed_bl2.c"
 set "appli_dir=../../../../%oemirot_boot_path_project%"
-set "update=%projectdir%\..\..\..\..\ROT_Provisioning\OEMiROT\ob_flash_programming.bat"
+set "update=%projectdir%\..\..\..\..\ROT_Provisioning\OEMiROT_SOnlyApp\ob_flash_programming.bat"
 
 
-set "provisioning=%projectdir%\..\..\..\..\ROT_Provisioning\OEMiROT\img_config.bat"
-set ns_main="%appli_dir%\NonSecure\Inc\main.h"
-set s_main="%appli_dir%\Secure\Inc\main.h"
-set appli_flash_layout="%appli_dir%\Secure_nsclib\appli_flash_layout.h"
+set "provisioning=%projectdir%\..\..\..\..\ROT_Provisioning\OEMiROT_SOnlyApp\img_config.bat"
+set s_main="%appli_dir%\Inc\main.h"
+set appli_flash_layout="%appli_dir%\Inc\appli_flash_layout.h"
 set appli_postbuild="%appli_dir%\EWARM\postbuild.bat"
 set "map_properties=%projectdir%\..\..\OEMiROT_Boot\map.properties"
-set s_code_xml="%projectdir%\..\..\..\..\ROT_Provisioning\OEMiROT\Images\OEMiROT_S_Code_Image.xml"
-set s_data_xml="%projectdir%\..\..\..\..\ROT_Provisioning\OEMiROT\Images\OEMiROT_S_Data_Image.xml"
-set s_code_init_xml="%projectdir%\..\..\..\..\ROT_Provisioning\OEMiROT\Images\OEMiROT_S_Code_Init_Image.xml"
-set s_data_init_xml="%projectdir%\..\..\..\..\ROT_Provisioning\OEMiROT\Images\OEMiROT_S_Data_Init_Image.xml"
+set s_code_xml="%projectdir%\..\..\..\..\ROT_Provisioning\OEMiROT_SOnlyApp\Images\OEMiROT_S_Code_Image.xml"
+set s_data_xml="%projectdir%\..\..\..\..\ROT_Provisioning\OEMiROT_SOnlyApp\Images\OEMiROT_S_Data_Image.xml"
+set s_code_init_xml="%projectdir%\..\..\..\..\ROT_Provisioning\OEMiROT_SOnlyApp\Images\OEMiROT_S_Code_Init_Image.xml"
+set s_data_init_xml="%projectdir%\..\..\..\..\ROT_Provisioning\OEMiROT_SOnlyApp\Images\OEMiROT_S_Data_Init_Image.xml"
 set auth_s="Authentication secure key"
 set auth_ns="Authentication non secure key"
 set xml_fw_app_item_name="Firmware binary input file"
 set xml_fw_data_item_name="Data binary input file"
 set xml_output_item_name="Image output file"
 set xml_enc_item_name="Encryption key"
-set s_icf_file="%appli_dir%\EWARM\Secure\stm32h563xx_flash_s.icf"
-set ns_icf_file="%appli_dir%\EWARM\NonSecure\stm32h563xx_flash_ns.icf"
+set s_icf_file="%appli_dir%\EWARM\stm32h563xx_flash.icf"
 set code_size="Firmware area size"
 set data_size="Data download slot size"
 set scratch_sector_number="Number of scratch sectors"
@@ -163,10 +161,6 @@ set "command=%python%%applicfg% flash --layout %preprocess_bl2_file% -b app_imag
 %command%
 IF !errorlevel! NEQ 0 goto :error
 
-set "command=%python%%applicfg% flash --layout %preprocess_bl2_file% -b app_image_number -m  RE_APP_IMAGE_NUMBER --decimal %update% --vb >> %current_log_file% 2>&1"
-%command%
-IF !errorlevel! NEQ 0 goto :error
-
 set "command=%python%%applicfg% flash --layout %preprocess_bl2_file% -b app_image_number -m  RE_APP_IMAGE_NUMBER --decimal --vb %provisioning% >> %current_log_file% 2>&1"
 %command%
 IF !errorlevel! NEQ 0 goto :error
@@ -183,19 +177,7 @@ set "command=%python%%applicfg% linker --layout %preprocess_bl2_file% -m RE_AREA
 %command%
 IF !errorlevel! NEQ 0 goto :error
 
-set "command=%python%%applicfg% linker --layout %preprocess_bl2_file% -m RE_AREA_0_OFFSET -n S_CODE_OFFSET %ns_icf_file% --vb >> %current_log_file% 2>&1"
-%command%
-IF !errorlevel! NEQ 0 goto :error
-
 set "command=%python%%applicfg% linker --layout %preprocess_bl2_file% -m RE_IMAGE_FLASH_SECURE_IMAGE_SIZE -n S_CODE_SIZE %s_icf_file% --vb >> %current_log_file% 2>&1"
-%command%
-IF !errorlevel! NEQ 0 goto :error
-
-set "command=%python%%applicfg% linker --layout %preprocess_bl2_file% -m RE_IMAGE_FLASH_SECURE_IMAGE_SIZE -n S_CODE_SIZE %ns_icf_file% --vb >> %current_log_file% 2>&1"
-%command%
-IF !errorlevel! NEQ 0 goto :error
-
-set "command=%python%%applicfg% linker --layout %preprocess_bl2_file% -m RE_CMSE_VENEER_REGION_SIZE -n CMSE_VENEER_REGION_SIZE %s_icf_file% --vb >> %current_log_file% 2>&1"
 %command%
 IF !errorlevel! NEQ 0 goto :error
 
@@ -284,7 +266,7 @@ set "command=%python%%applicfg% definevalue --layout %preprocess_bl2_file% -m RE
 %command%
 IF !errorlevel! NEQ 0 goto :error
 
-set "command=%python%%applicfg% definevalue --layout %preprocess_bl2_file% -m RE_IMAGE_FLASH_SECURE_IMAGE_SIZE -n FLASH_S_PARTITION_SIZE %appli_flash_layout% --vb >> %current_log_file% 2>&1"
+set "command=%python%%applicfg% definevalue --layout %preprocess_bl2_file% -m RE_IMAGE_FLASH_SECURE_IMAGE_SIZE -n FLASH_S_ACTIVESLOT_SIZE %appli_flash_layout% --vb >> %current_log_file% 2>&1"
 %command%
 IF !errorlevel! NEQ 0 goto :error
 
