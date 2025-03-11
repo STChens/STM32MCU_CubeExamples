@@ -322,7 +322,9 @@ int main(void)
   COM_Init.WordLength = COM_WORDLENGTH_8B;
 
   BSP_COM_Init(COM1, &COM_Init);
-  printf("\r\nCOM Init done.\r\n");
+  printf("\r\n=======================================================\r\n");
+  printf("\r\n* Test Application COM Init done. %s %s\r\n", __DATE__, __TIME__);
+  printf("\r\n=======================================================\r\n");
   
   SHA256_SuspendResume_Test();
   MX_HASH_Init();
