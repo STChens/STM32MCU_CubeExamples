@@ -33,6 +33,7 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 #include "stm32h5xx_nucleo.h"
 #include "string.h"
+#include "flash_layout.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

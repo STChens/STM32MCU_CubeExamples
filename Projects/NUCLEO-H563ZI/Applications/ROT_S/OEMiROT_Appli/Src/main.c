@@ -105,7 +105,7 @@ static void print_buf(char *str, const uint8_t *buf, int size)
     printf("\r\n=========================================\r\n");
 }
 
-static void print_menu(void)
+static void print_hashtest_menu(void)
 {
 	printf("\r\n===============================================\r\n");
 	printf("Please choose the buffer length for HASH test \r\n\r\n");
@@ -119,7 +119,15 @@ static void print_menu(void)
 #if defined USE_FREE_RTOS    
         printf("Test in multi thread:  --------- 8\r\n");
 #endif
+        printf("Return:  ----------------------- x\r\n");
 	printf("================================================\r\n");
+}
+
+static void print_main_menu(void)
+{
+	printf("\r\nJump to loader for App FW update:  -------------- 1\r\n");
+	printf("\r\nRun HASH test:  --------------------------------- 2\r\n");
+	printf("\r\n=======================================================\r\n");	
 }
 #endif
 
@@ -268,75 +276,19 @@ static void SHA256_Accumulate_Test(HASH_HandleTypeDef *phhash, int bufLen)
 #endif
 }
 
-/* USER CODE END 0 */
-
-/**
-  * @brief  The application entry point.
-  * @retval int
-  */
-int main(void)
-{
-  /* USER CODE BEGIN 1 */
-  /* STM32H5xx HAL library initialization:
-       - Systick timer is configured by default as source of time base, but user
-             can eventually implement his proper time base source (a general purpose
-             timer for example or other time source), keeping in mind that Time base
-             duration should be kept 1ms since PPP_TIMEOUT_VALUEs are defined and
-             handled in milliseconds basis.
-       - Set NVIC Group Priority to 4
-       - Low Level Initialization
-     */
-  /* USER CODE END 1 */
-
-  /* MCU Configuration--------------------------------------------------------*/
-
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
-
-  /* USER CODE BEGIN Init */
-
-  /* USER CODE END Init */
-
-  /* Configure the system clock */
-  SystemClock_Config();
-
-  /* USER CODE BEGIN SysInit */
-
-  /* USER CODE END SysInit */
-
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  
-  MX_ICACHE_Init();
-  /* USER CODE BEGIN 2 */
-  /* Configure LED1, LED3 */
-  BSP_LED_Init(LED1);
-  BSP_LED_Init(LED3);
-
-#if defined LOG_ENABLED
-  COM_InitTypeDef COM_Init;
-  COM_Init.BaudRate = 115200;
-  COM_Init.HwFlowCtl = COM_HWCONTROL_NONE;
-  COM_Init.Parity = COM_PARITY_NONE;
-  COM_Init.StopBits = COM_STOPBITS_1;
-  COM_Init.WordLength = COM_WORDLENGTH_8B;
-
-  BSP_COM_Init(COM1, &COM_Init);
-  printf("\r\n=======================================================\r\n");
-  printf("\r\n* Test Application version: (%c) \r\n", AppVer);
-  printf("\r\n* Build time: %s %s\r\n", __DATE__, __TIME__);
-  printf("\r\n=======================================================\r\n");
-  
-  SHA256_SuspendResume_Test();
+static void Run_HASH_TEST(void)
+{  
+  int exit = 0;
   MX_HASH_Init();
-
-  while(1)
+  
+#if defined LOG_ENABLED
+  while(exit == 0)
   {
 	  uint8_t select = 0;
 
 	  extern UART_HandleTypeDef hcom_uart[COM_NBR];
 
-	  print_menu();
+	  print_hashtest_menu();
 
 	  while(1)
 	  {
@@ -372,6 +324,9 @@ int main(void)
 		  FreeRTOS_Test_Run();
 	  	  break;
 #endif
+          case 'x':
+                  exit = 1;
+                  break;
 	  default:
 		  printf("Invalid input!\r\n");
 		  break;
@@ -379,7 +334,117 @@ int main(void)
   }
 #else
   SHA256_Accumulate_Test(BUFFLEN);
-#endif /* USE_COM_LOG */  
+#endif /* USE_COM_LOG */   
+}
+
+struct boot_arm_vector_table {
+    uint32_t msp;
+    uint32_t reset;
+};
+
+static void Jump2Loader(void)
+{
+  static struct boot_arm_vector_table *vt;
+  
+  vt = (struct boot_arm_vector_table *)BOOTLOADER_BASE;
+  /*  change stack limit  */
+  __set_MSPLIM(0);  
+  __set_MSP(vt->msp);
+  void (*fp)(void) = (void(*)(void))vt->reset;
+  fp();
+}
+
+/* USER CODE END 0 */
+
+/**
+  * @brief  The application entry point.
+  * @retval int
+  */
+int main(void)
+{
+  /* USER CODE BEGIN 1 */
+  /* STM32H5xx HAL library initialization:
+       - Systick timer is configured by default as source of time base, but user
+             can eventually implement his proper time base source (a general purpose
+             timer for example or other time source), keeping in mind that Time base
+             duration should be kept 1ms since PPP_TIMEOUT_VALUEs are defined and
+             handled in milliseconds basis.
+       - Set NVIC Group Priority to 4
+       - Low Level Initialization
+     */
+  /* USER CODE END 1 */
+
+  /* MCU Configuration--------------------------------------------------------*/
+
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  HAL_Init();
+
+  /* USER CODE BEGIN Init */
+  HAL_MPU_Disable();
+
+  /* USER CODE END Init */
+
+  /* Configure the system clock */
+  SystemClock_Config();
+
+  /* USER CODE BEGIN SysInit */
+
+  /* USER CODE END SysInit */
+
+  /* Initialize all configured peripherals */
+  MX_GPIO_Init();
+  
+  MX_ICACHE_Init();
+  /* USER CODE BEGIN 2 */
+  /* Configure LED1, LED3 */
+  BSP_LED_Init(LED1);
+  BSP_LED_Init(LED3);
+
+#if defined LOG_ENABLED
+  COM_InitTypeDef COM_Init;
+  COM_Init.BaudRate = 115200;
+  COM_Init.HwFlowCtl = COM_HWCONTROL_NONE;
+  COM_Init.Parity = COM_PARITY_NONE;
+  COM_Init.StopBits = COM_STOPBITS_1;
+  COM_Init.WordLength = COM_WORDLENGTH_8B;
+
+  BSP_COM_Init(COM1, &COM_Init);
+  printf("\r\n=======================================================\r\n");
+  printf("= Test Application version: (%c) \r\n", AppVer);
+  printf("= Build time: %s %s\r\n", __DATE__, __TIME__);
+  printf("=======================================================\r\n");
+  
+  MX_HASH_Init();
+
+  while(1)
+  {
+	  uint8_t select = 0;
+
+	  extern UART_HandleTypeDef hcom_uart[COM_NBR];
+
+	  print_main_menu();
+
+	  while(1)
+	  {
+		  if ( HAL_UART_Receive(&hcom_uart[COM1], &select, sizeof(select), 1000) == HAL_OK)
+			  break;
+	  }
+	  printf("Your choice is %c\r\n", select);
+	  switch(select)
+	  {
+	  case '1':
+		  Jump2Loader();
+	  	  break;
+	  case '2':
+		  Run_HASH_TEST();
+	  	  break;
+	  default:
+		  printf("Invalid input!\r\n");
+		  break;
+	  }
+  }
+
+#endif /* USE_COM_LOG */ 
   /* USER CODE END 2 */
 
   /* Infinite loop */
