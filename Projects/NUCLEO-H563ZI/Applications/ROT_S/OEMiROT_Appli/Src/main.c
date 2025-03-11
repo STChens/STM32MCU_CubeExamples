@@ -33,7 +33,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define AppVer 'A'
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -323,7 +323,8 @@ int main(void)
 
   BSP_COM_Init(COM1, &COM_Init);
   printf("\r\n=======================================================\r\n");
-  printf("\r\n* Test Application COM Init done. %s %s\r\n", __DATE__, __TIME__);
+  printf("\r\n* Test Application version: (%c) \r\n", AppVer);
+  printf("\r\n* Build time: %s %s\r\n", __DATE__, __TIME__);
   printf("\r\n=======================================================\r\n");
   
   SHA256_SuspendResume_Test();

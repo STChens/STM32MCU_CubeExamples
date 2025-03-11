@@ -177,4 +177,31 @@
 #define NS_DATA_IMAGE_DATA1_SIZE            (32U)
 #endif /* (MCUBOOT_NS_DATA_IMAGE_NUMBER == 1) */
 
+/* Definitions for external loader in user flash */
+#if (defined MCUBOOT_EXT_LOADER && !defined USE_SYTEM_BOOTLOADER)
+/*  Secure Loader Image */
+/* Control  Secure Loader Image */
+#if (FLASH_AREA_LOADER_OFFSET  % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0
+#error "FLASH_AREA_LOADER_OFFSET  not aligned on FLASH_AREA_IMAGE_SECTOR_SIZE"
+#endif /* (FLASH_AREA_LOADER_OFFSET  % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0  */
+
+#define LOADER_S_MSP_STACK_SIZE 0x0000400
+#define LOADER_S_HEAP_SIZE      0x0000200
+#define LOADER_S_PSP_STACK_SIZE 0x0000400
+   
+#define LOADER_IMAGE_S_CODE_SIZE            (FLASH_AREA_LOADER_SIZE)
+
+#define LOADER_S_ROM_ALIAS(x)               (_FLASH_BASE_S + (x))
+
+#define LOADER_S_CODE_START                 (LOADER_S_ROM_ALIAS(FLASH_AREA_LOADER_OFFSET))
+#define LOADER_S_CODE_SIZE                  (LOADER_IMAGE_S_CODE_SIZE) 
+#define LOADER_S_CODE_LIMIT                 (LOADER_S_CODE_START + LOADER_S_CODE_SIZE -1)
+#define LOADER_S_DATA_START                 (S_RAM_ALIAS(_SRAM1_SIZE_MAX))
+#define LOADER_S_DATA_SIZE                  (_SRAM2_SIZE_MAX)
+#define LOADER_S_DATA_LIMIT                 (LOADER_S_DATA_START + LOADER_S_DATA_SIZE - 1)
+//#define TRIGGER_LOADER_ADDRESS              (NS_RAM_ALIAS(0))
+//#define TRIGGER_LOADER_ADDRESS_S            (S_RAM_ALIAS(0))
+//#define TRIGGER_LOADER_MAGIC                (0x10ADE8AD)      
+#endif        /* #if (defined MCUBOOT_EXT_LOADER && !defined USE_SYTEM_BOOTLOADER) */
+   
 #endif /* __REGION_DEFS_H__ */

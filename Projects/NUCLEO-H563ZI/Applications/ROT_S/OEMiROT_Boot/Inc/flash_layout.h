@@ -68,7 +68,7 @@
 #if defined(DEVICE_1M_FLASH_ENABLE)
 #define FLASH_B_SIZE                    (0x40000)   /* 256 KBytes*/
 #else
-#define FLASH_B_SIZE                    (0x80000) /* 256 MBytes */
+#define FLASH_B_SIZE                    (0x40000) /* 256 MBytes */
 #endif /* DEVICE_1M_FLASH_ENABLE */
 #define FLASH_TOTAL_SIZE                (FLASH_B_SIZE+FLASH_B_SIZE) /* 512 KBytes*/
 #define FLASH_BASE_ADDRESS              (0x08000000)
@@ -96,10 +96,6 @@
 /* area for BL2 code protected by hdp */
 #define FLASH_AREA_BL2_OFFSET           (0x0000)
 #define FLASH_AREA_BL2_SIZE             (0x18000)
-
-/* area for EDATA */
-#define FLASH_EDATA_AREA_SIZE   (0x2000) /* 8KB for EDATA */
-#define FLASH_EDATA_AREA_OFFSET         (FLASH_BASE_ADDRESS + FLASH_TOTAL_SIZE - FLASH_EDATA_AREA_SIZE)
 
 /* scratch area */
 #if defined(FLASH_AREA_SCRATCH_ID)
@@ -134,7 +130,7 @@
 #endif /* ((FLASH_AREA_BL2_OFFSET+FLASH_AREA_BL2_SIZE) % FLASH_AREA_WRP_GROUP_SIZE) != 0 */
 
 /* BL2 partitions size */
-#define FLASH_S_PARTITION_SIZE          (0x80000 - FLASH_AREA_0_OFFSET) /* 512 KB for S partition */
+#define FLASH_S_PARTITION_SIZE          (FLASH_TOTAL_SIZE - FLASH_AREA_0_OFFSET) /* 512 KB for S partition */
 #define FLASH_NS_PARTITION_SIZE         (0x0) /* 0 KB for NS partition */
 #define FLASH_PARTITION_SIZE            (FLASH_S_PARTITION_SIZE+FLASH_NS_PARTITION_SIZE)
 
@@ -204,7 +200,7 @@ This value may change if the layout changes, in such case, please recalculate th
 #if (MCUBOOT_APP_IMAGE_NUMBER == 2)
 #define FLASH_AREA_0_SIZE               (FLASH_S_ACTIVESLOT_SIZE)
 #else
-#define FLASH_AREA_0_SIZE               (FLASH_PARTITION_SIZE)
+#define FLASH_AREA_0_SIZE               (FLASH_S_ACTIVESLOT_SIZE)
 #endif /* (MCUBOOT_APP_IMAGE_NUMBER == 2) */
 /* Control Secure app image primary slot */
 #if (FLASH_AREA_0_OFFSET  % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0
@@ -254,6 +250,27 @@ This value may change if the layout changes, in such case, please recalculate th
 /* Control flash area end */
 #if (FLASH_AREA_END_OFFSET  % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0
 #error "FLASH_AREA_END_OFFSET  not aligned on FLASH_AREA_IMAGE_SECTOR_SIZE"
+#endif /*  (FLASH_AREA_END_OFFSET  % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0 */
+
+/* EDATA area */
+#define FLASH_AREA_EDATA_SIZE    (0x2000) /* 8KB at the end of the flash is reserved for EDATA */
+#define FLASH_AREA_EDATA_OFFSET  (FLASH_TOTAL_SIZE - FLASH_AREA_EDATA_SIZE) 
+
+/* User loader area */
+#if (defined MCUBOOT_EXT_LOADER && !defined USE_SYTEM_BOOTLOADER)
+
+#define LOADER_FLASH_DEV_NAME             Driver_FLASH0
+
+#define FLASH_AREA_LOADER_SIZE   (0xC000) /* 48 KB for loader */
+#define FLASH_AREA_LOADER_OFFSET (FLASH_AREA_EDATA_OFFSET - FLASH_AREA_LOADER_SIZE) /* put at the end of the flash before EDATA area */
+#else /*  (defined MCUBOOT_EXT_LOADER && !defined USE_SYTEM_BOOTLOADER) */
+#define FLASH_AREA_LOADER_SIZE   (0) /* 48 KB for loader */
+#define FLASH_AREA_LOADER_OFFSET (FLASH_AREA_EDATA_OFFSET - FLASH_AREA_LOADER_SIZE) /* put at the end of the flash before EDATA area */
+#endif /*  (defined MCUBOOT_EXT_LOADER && !defined USE_SYTEM_BOOTLOADER) */
+
+/* Control flash area end and loader offset */
+#if (FLASH_AREA_END_OFFSET  >=  FLASH_AREA_LOADER_OFFSET) 
+#error "FLASH_AREA_END_OFFSET overlap with FLASH_AREA_LOADER_OFFSET!"
 #endif /*  (FLASH_AREA_END_OFFSET  % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0 */
 
 /*

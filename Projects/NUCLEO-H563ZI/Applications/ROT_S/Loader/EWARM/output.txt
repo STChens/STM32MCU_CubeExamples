@@ -1,0 +1,3 @@
+"loader with secure part only" 
+python: can't open file 'C:\\Users\\chens\\STM32Cube\\Repository\\H5_V1.4.0\\Projects\\NUCLEO-H563ZI\\Applications\\ROT_S\\Loader\\EWARM\\scripts\\imgtool\\main.py': [Errno 2] No such file or directory
+"python C:\Users\chens\STM32Cube\Repository\H5_V1.4.0\Projects\NUCLEO-H563ZI\Applications\ROT_S\Loader\EWARM\scripts\imgtool\main.py ass -i 0x18000 C:\Users\chens\STM32Cube\Repository\H5_V1.4.0\Projects\NUCLEO-H563ZI\Applications\ROT_S\Loader\EWARM\\STM32H573I-DK\Exe\Project.bin C:\Users\chens\STM32Cube\Repository\H5_V1.4.0\Projects\NUCLEO-H563ZI\Applications\ROT_S\Loader\EWARM\\..\..\Binary\loader.bin >> C:\Users\chens\STM32Cube\Repository\H5_V1.4.0\Projects\NUCLEO-H563ZI\Applications\ROT_S\Loader\EWARM\\output.txt 2>&1 : failed" 
