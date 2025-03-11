@@ -544,6 +544,7 @@ static const struct sau_cfg_t region_sau_load_cfg[] =
    ================= */
 static const struct mpu_armv8m_region_cfg_t region_cfg_loader_s[] =
 {
+#if defined (USE_SYSTEM_BOOTLOADER)  
   /* Region 7: Extend read access to STM32 descriptors and bootloader vector table */
   {
     7,
@@ -560,6 +561,24 @@ static const struct mpu_armv8m_region_cfg_t region_cfg_loader_s[] =
     FLOW_CTRL_MPU_L_CH_R7,
 #endif /* FLOW_CONTROL */
   },
+#else
+  /* Region 7: Allow execution of loader code area */
+  {
+    7,
+    BOOTLOADER_BASE,
+    BOOTLOADER_BASE + FLASH_AREA_LOADER_SIZE - 1,
+    MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
+    MPU_ARMV8M_XN_EXEC_OK,
+    MPU_ARMV8M_AP_RO_PRIV_ONLY,
+    MPU_ARMV8M_SH_NONE,
+#ifdef FLOW_CONTROL
+    FLOW_STEP_MPU_L_EN_R7,
+    FLOW_CTRL_MPU_L_EN_R7,
+    FLOW_STEP_MPU_L_CH_R7,
+    FLOW_CTRL_MPU_L_CH_R7,
+#endif /* FLOW_CONTROL */
+  },  
+#endif
 };
 #endif /* MCUBOOT_EXT_LOADER */
 
@@ -984,6 +1003,7 @@ static void gpio_loader_cfg(void)
   /* configuration stage */
   if (uFlowStage == FLOW_STAGE_CFG)
   {
+#if defined (USE_SYSTEM_BOOTLOADER)       
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOB_CLK_ENABLE();
     __HAL_RCC_GPIOC_CLK_ENABLE();
@@ -994,13 +1014,14 @@ static void gpio_loader_cfg(void)
     GPIOB_S->SECCFGR = ~GPIOB_MASK_SECCFG;
     GPIOC_S->SECCFGR = ~GPIOC_MASK_SECCFG;
     GPIOD_S->SECCFGR = ~GPIOD_MASK_SECCFG;
-
+#endif
     /* Execution stopped if flow control failed */
     FLOW_CONTROL_STEP(uFlowProtectValue, FLOW_STEP_GPIO_L_EN, FLOW_CTRL_GPIO_L_EN);
   }
   /* verification stage */
   else
   {
+#if defined (USE_SYSTEM_BOOTLOADER)       
     /* Verify required GPIO configured non secure */
     uint32_t gpioa_seccfgr = GPIOA_S->SECCFGR;
     uint32_t gpiob_seccfgr = GPIOB_S->SECCFGR;
@@ -1014,6 +1035,7 @@ static void gpio_loader_cfg(void)
       Error_Handler();
     }
     else
+#endif      
     {
       /* Execution stopped if flow control failed */
       FLOW_CONTROL_STEP(uFlowProtectValue, FLOW_STEP_GPIO_L_CH, FLOW_CTRL_GPIO_L_CH);
@@ -1031,6 +1053,7 @@ static void nvic_loader_cfg(void)
   /* configuration stage */
   if (uFlowStage == FLOW_STAGE_CFG)
   {
+#if defined (USE_SYSTEM_BOOTLOADER)    
     /* Enable HardFault/busFault and NMI exception in ns.
      * It is up to BL to drive non-secure faults
      * Do not enter in secure on non-secure fault
@@ -1044,11 +1067,13 @@ static void nvic_loader_cfg(void)
     NVIC->ITNS[1U] = RSS_NVIC_INIT_ITNS1_VAL;
     NVIC->ITNS[2U] = RSS_NVIC_INIT_ITNS2_VAL;
     NVIC->ITNS[3U] = RSS_NVIC_INIT_ITNS3_VAL;
+#endif    
     FLOW_CONTROL_STEP(uFlowProtectValue, FLOW_STEP_NVIC_L_EN, FLOW_CTRL_NVIC_L_EN);
   }
   /* verification stage */
   else
   {
+#if defined (USE_SYSTEM_BOOTLOADER)    
     uint32_t itns0 = NVIC->ITNS[0U];
     uint32_t itns1 = NVIC->ITNS[1U];
     uint32_t itns2 = NVIC->ITNS[2U];
@@ -1064,6 +1089,7 @@ static void nvic_loader_cfg(void)
       Error_Handler();
     }
     else
+#endif      
     {
       FLOW_CONTROL_STEP(uFlowProtectValue, FLOW_STEP_NVIC_L_CH, FLOW_CTRL_NVIC_L_CH);
     }
@@ -1316,12 +1342,13 @@ static void sau_loader_cfg(void)
 
     for (i = 0; i < ARRAY_SIZE(region_sau_load_cfg); i++)
     {
+#if defined (USE_SYSTEM_BOOTLOADER)  
       SAU->RNR = region_sau_load_cfg[i].RNR;
       SAU->RBAR = region_sau_load_cfg[i].RBAR & SAU_RBAR_BADDR_Msk;
       SAU->RLAR = (region_sau_load_cfg[i].RLAR & SAU_RLAR_LADDR_Msk) |
                   (region_sau_load_cfg[i].nsc ? SAU_RLAR_NSC_Msk : 0U) |
                   SAU_RLAR_ENABLE_Msk;
-
+#endif
       /* Execution stopped if flow control failed */
       FLOW_CONTROL_STEP(uFlowProtectValue, region_sau_load_cfg[i].flow_step_enable,
                                            region_sau_load_cfg[i].flow_ctrl_enable);
@@ -1344,6 +1371,8 @@ static void sau_loader_cfg(void)
   {
     for (i = 0; i < ARRAY_SIZE(region_sau_load_cfg); i++)
     {
+#if defined (USE_SYSTEM_BOOTLOADER)  
+      
       SAU->RNR = region_sau_load_cfg[i].RNR;
 
       rnr = region_sau_load_cfg[i].RNR;
@@ -1360,11 +1389,13 @@ static void sau_loader_cfg(void)
       {
         Error_Handler();
       }
-
+#endif
       /* Execution stopped if flow control failed */
       FLOW_CONTROL_STEP(uFlowProtectValue, region_sau_load_cfg[i].flow_step_check,
                                            region_sau_load_cfg[i].flow_ctrl_check);
     }
+
+#if defined (USE_SYSTEM_BOOTLOADER)  
 
     ctrl_reg = SAU->CTRL;
     if ((ctrl_reg & SAU_CTRL_ENABLE_Msk) != SAU_CTRL_ENABLE_Msk)
@@ -1372,11 +1403,13 @@ static void sau_loader_cfg(void)
       Error_Handler();
     }
     else
+#endif
     {
       /* Execution stopped if flow control failed */
       FLOW_CONTROL_STEP(uFlowProtectValue, FLOW_STEP_SAU_L_CH, FLOW_CTRL_SAU_L_CH);
     }
 
+#if defined (USE_SYSTEM_BOOTLOADER)  
     /* Allows Floating Point Unit usage by NonSecure */
     /*
     // <e>Setup behaviour of Floating Point Unit
@@ -1426,13 +1459,16 @@ static void sau_loader_cfg(void)
     /* Lock SAU config */
     __HAL_RCC_SBS_CLK_ENABLE();
     SBS->CSLCKR |= SBS_CSLCKR_LOCKSAU;
+#endif    
     FLOW_CONTROL_STEP(uFlowProtectValue, FLOW_STEP_SAU_L_LCK, FLOW_CTRL_SAU_L_LCK);
+#if defined (USE_SYSTEM_BOOTLOADER)  
     if (((* (uint32_t *)read_reg) & SBS_CSLCKR_LOCKSAU) == 0U)
     {
       Error_Handler();
     }
+#endif    
     FLOW_CONTROL_STEP(uFlowProtectValue, FLOW_STEP_SAU_L_LCK_CH, FLOW_CTRL_SAU_L_LCK_CH);
-  }
+  } 
 }
 #endif /* MCUBOOT_EXT_LOADER */
 
@@ -1450,6 +1486,7 @@ static void gtzc_loader_cfg(void)
   /* configuration stage */
   if (uFlowStage == FLOW_STAGE_CFG)
   {
+#if defined (USE_SYSTEM_BOOTLOADER)    
     __HAL_RCC_GTZC1_CLK_ENABLE();
 
     /* All bocks of SRAM1 configured non secure / privileged (default value)  */
@@ -1465,20 +1502,27 @@ static void gtzc_loader_cfg(void)
       /*SRAM3 -> MPCBB3*/
       GTZC_MPCBB3_S->SECCFGR[i] = GTZC_MPCBB_ALL_NSEC;
     }
-
+#endif 
+    /* We don't need to reconfigure GTZC before jumping to user flash loader 
+       Just keep the code for flow control
+     */
+    
     /* Execution stopped if flow control failed */
     FLOW_CONTROL_STEP(uFlowProtectValue, FLOW_STEP_GTZC_L_EN_MPCBB1, FLOW_CTRL_GTZC_L_EN_MPCBB1);
 
+#if defined (USE_SYSTEM_BOOTLOADER)     
     /* Required peripherals configured non secure (default value) / privileged */
     GTZC_TZSC1_S->PRIVCFGR1 = TZSC_MASK_R1;
     GTZC_TZSC1_S->PRIVCFGR2 = TZSC_MASK_R2;
     GTZC_TZSC1_S->PRIVCFGR3 = TZSC_MASK_R3;
+#endif     
     /* Execution stopped if flow control failed */
     FLOW_CONTROL_STEP(uFlowProtectValue, FLOW_STEP_GTZC_L_EN_TZSC, FLOW_CTRL_GTZC_L_EN_TZSC);
   }
   /* verification stage */
   else
   {
+#if defined (USE_SYSTEM_BOOTLOADER)     
     /* Verify all bocks of SRAM1 configured non secure / privileged */
     for (i = 0U; i < GTZC_MPCBB1_NB_VCTR; i++)
     {
@@ -1491,11 +1535,13 @@ static void gtzc_loader_cfg(void)
     }
 
     if (i == GTZC_MPCBB1_NB_VCTR)
+#endif
     {
       /* Execution stopped if flow control failed */
       FLOW_CONTROL_STEP(uFlowProtectValue, FLOW_STEP_GTZC_L_CH_MPCBB1, FLOW_CTRL_GTZC_L_CH_MPCBB1);
     }
 
+#if defined (USE_SYSTEM_BOOTLOADER)
     /* Verify required peripherals configured non secure / privileged */
     uint32_t seccfgr1 = GTZC_TZSC1_S->SECCFGR1;
     uint32_t privcfgr1 = GTZC_TZSC1_S->PRIVCFGR1;
@@ -1513,10 +1559,12 @@ static void gtzc_loader_cfg(void)
       Error_Handler();
     }
     else
+#endif      
     {
       /* Execution stopped if flow control failed */
       FLOW_CONTROL_STEP(uFlowProtectValue, FLOW_STEP_GTZC_L_CH_TZSC, FLOW_CTRL_GTZC_L_CH_TZSC);
     }
+ 
   }
 }
 #endif /* MCUBOOT_EXT_LOADER && GENERATOR_LOADER_IN_SYSTEM_FLASH */

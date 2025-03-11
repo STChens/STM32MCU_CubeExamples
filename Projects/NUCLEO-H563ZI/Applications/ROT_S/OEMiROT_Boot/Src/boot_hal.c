@@ -112,6 +112,7 @@ void getDescriptorAdd(void);
   */
 void boot_platform_noimage(void)
 {
+#if defined (USE_SYSTEM_BOOTLOADER)
   uint32_t rsslib_sec_jump_HDP_lvl3ns;
 
   BOOT_LOG_INF("Jumping to bootloader");
@@ -119,7 +120,15 @@ void boot_platform_noimage(void)
 
   /* Init RSS jump function descriptor */
   rsslib_sec_jump_HDP_lvl3ns = (uint32_t)(Rss_lib_p->S.JumpHDPLvl3NS);
+#else
+  uint32_t rsslib_sec_jump_HDP_lvl3;
+  static struct boot_arm_vector_table *vt;
 
+  BOOT_LOG_INF("Jumping to UART YModem bootloader @%08x", BOOTLOADER_BASE);
+  
+  /* Init RSS jump function descriptor */
+  rsslib_sec_jump_HDP_lvl3 = (uint32_t)(Rss_lib_p->S.JumpHDPLvl3);
+#endif
   /* Check Flow control */
   FLOW_CONTROL_CHECK(uFlowProtectValue, FLOW_CTRL_STAGE_2);
   uFlowStage = FLOW_STAGE_CFG;
@@ -139,10 +148,21 @@ void boot_platform_noimage(void)
   /* Check Flow control */
   FLOW_CONTROL_CHECK(uFlowProtectValue, FLOW_CTRL_STAGE_4_L);
 
+#if defined (USE_SYSTEM_BOOTLOADER)  
   /* Jump into BL through RSS */
   /* last parameter (0U) not used in RSSLIB_Sec_JumpHDPL3NS(BOOTLOADER_BASE_NS); */
   boot_jump_to_RSS((uint32_t)&boot_jump_to_RSS, rsslib_sec_jump_HDP_lvl3ns, (uint32_t) BOOTLOADER_BASE_NS, 0U);
-
+#else
+  /* Jump into BL through RSS */
+  
+  vt = (struct boot_arm_vector_table *)BOOTLOADER_BASE;
+  /*  change stack limit  */
+  __set_MSPLIM(0);
+    
+  /* last parameter (0U) not used in RSSLIB_Sec_JumpHDPL3NS(BOOTLOADER_BASE_NS); */
+  boot_jump_to_RSS((uint32_t)&boot_jump_to_RSS, rsslib_sec_jump_HDP_lvl3, (uint32_t)vt, 0U);  
+#endif
+  
   /* Avoid compiler to pop registers after having changed MSP */
 #if !defined(__ICCARM__)
   __builtin_unreachable();
@@ -477,6 +497,7 @@ int32_t boot_platform_init(void)
 #ifdef OEMIROT_DEV_MODE
     /* Init for log */
     stdio_init();
+    BOOT_LOG_INF("\r\nBL2 Platform Init. Build: %s:%s", __DATE__, __TIME__);
 #endif /*  OEMIROT_DEV_MODE */
 
 #ifdef OEMIROT_ICACHE_ENABLE

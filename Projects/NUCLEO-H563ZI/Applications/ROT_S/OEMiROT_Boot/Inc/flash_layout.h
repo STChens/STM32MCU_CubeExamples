@@ -72,6 +72,7 @@
 #endif /* DEVICE_1M_FLASH_ENABLE */
 #define FLASH_TOTAL_SIZE                (FLASH_B_SIZE+FLASH_B_SIZE) /* 512 KBytes*/
 #define FLASH_BASE_ADDRESS              (0x08000000)
+#define FLASH_BASE_ADDRESS_S              (0x0C000000)
 
 /* Flash area IDs */
 #define FLASH_AREA_0_ID                 (1)
@@ -267,6 +268,8 @@ This value may change if the layout changes, in such case, please recalculate th
 #define FLASH_AREA_LOADER_SIZE   (0) /* 48 KB for loader */
 #define FLASH_AREA_LOADER_OFFSET (FLASH_AREA_EDATA_OFFSET - FLASH_AREA_LOADER_SIZE) /* put at the end of the flash before EDATA area */
 #endif /*  (defined MCUBOOT_EXT_LOADER && !defined USE_SYTEM_BOOTLOADER) */
+
+#define BOOTLOADER_BASE                  (FLASH_BASE_ADDRESS_S + FLASH_AREA_LOADER_OFFSET)
 
 /* Control flash area end and loader offset */
 #if (FLASH_AREA_END_OFFSET  >=  FLASH_AREA_LOADER_OFFSET) 

@@ -227,6 +227,7 @@
                     <state>DEFAULT_UART_BAUDRATE=115200</state>
                     <state>OEMIROT_DEV_MODE</state>
                     <state>BOOT_MAX_ALIGN=16</state>
+                    <state>NOT_USE_SYSTEM_BOOTLOADER</state>
                 </option>
                 <option>
                     <name>CCPreprocFile</name>
@@ -1239,9 +1240,6 @@
                 <name>$PROJ_DIR$\..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\constant_time.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\hmac_drbg.c</name>
-            </file>
-            <file>
                 <name>$PROJ_DIR$\..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\ecdh.c</name>
             </file>
             <file>
@@ -1258,6 +1256,9 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\hkdf.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\hmac_drbg.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\md.c</name>

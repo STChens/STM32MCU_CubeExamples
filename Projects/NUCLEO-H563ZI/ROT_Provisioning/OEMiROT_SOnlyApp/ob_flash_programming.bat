@@ -1,4 +1,5 @@
 call ../env_sonlyapp.bat
+
 set cube_fw_path=%cube_fw_path:"=%
 set rot_provisioning_path=%rot_provisioning_path:"=%
 
@@ -19,6 +20,7 @@ set boot_lck=0xB4
 set bootaddress=0xC000000
 set bootob=0xC0000
 set s_data_image_number=0
+set loader_image_number=1
 
 set s_code_image=%oemirot_appli_secure%
 set s_data_image=s_data_init_sign.hex
@@ -85,11 +87,20 @@ goto :error
 IF !errorlevel! NEQ 0 goto :error
 )
 
+if  "%loader_image_number%" == "1" (
+set "action=Write Loader image"
+echo %action%
+%stm32programmercli% %connect_no_reset% -d %cube_fw_path%\Projects\NUCLEO-H563ZI\Applications\ROT_S\Loader\Binary\Loader.hex -v
+IF !errorlevel! NEQ 0 goto :error
+echo "Loader Written"
+)
+
 set "action=Write OEMiROT_Boot"
 echo %action%
 %stm32programmercli% %connect_no_reset% -d %cube_fw_path%\Projects\NUCLEO-H563ZI\Applications\ROT_S\OEMiROT_Boot\Binary\OEMiROT_Boot.bin %bootaddress% -v
 IF !errorlevel! NEQ 0 goto :error
 echo "OEMiROT_Boot Written"
+
 
 :: ======================================================= Extra board protections =========================================================
 set "action=Configure Option Bytes"
