@@ -1,6 +1,7 @@
 @ECHO OFF
 :: arg1 is the binary type (1 nonsecure, 2 secure)
 set "signing=%1"
+set "toolset=%2"
 
 :: Getting the Trusted Package Creator CLI path
 set "projectdir=%~dp0"
@@ -28,8 +29,10 @@ set fw_out_bin="Image output file"
 set fw_in_bin="Firmware binary input file"
 set s_app_bin="%appli_dir%\Binary\rot_tz_s_app.bin"
 set s_app_enc_sign_hex="%appli_dir%\Binary\rot_tz_s_app_enc_sign.hex"
+set s_app_enc_sign_bin="%appli_dir%\Binary\rot_tz_s_app_enc_sign.bin"
 set s_app_init_sign_hex="%appli_dir%\Binary\rot_tz_s_app_init_sign.hex"
 set s_data_enc_sign_hex="%provisioningdir%\OEMiROT_SOnlyApp\Binary\s_data_enc_sign.hex"
+set s_data_enc_sign_bin="%provisioningdir%\OEMiROT_SOnlyApp\Binary\s_data_enc_sign.bin"
 set s_data_init_sign_hex="%provisioningdir%\OEMiROT_SOnlyApp\Binary\s_data_init_sign.hex"
 
 ::Variables updated by OEMiROT_Boot postbuild
@@ -88,6 +91,11 @@ if !errorlevel! neq 0 goto :error
 %python%%applicfg% xmlval -v %s_data_init_sign_hex% --string -n %fw_out_bin% %s_data_init_xml% --vb >> %current_log_file% 2>>&1
 if !errorlevel! neq 0 goto :error
 )
+
+:: TODO: Add one more step to convert enc hex file to binary file for FW update download with ext loader
+@echo %toolset% >> %current_log_file%
+%toolset%\bin\ielftool.exe --ihex --output %s_app_enc_sign_hex% %s_app_enc_sign_bin% >> %current_log_file% 2>>&1
+%toolset%\bin\ielftool.exe --ihex --output %s_data_enc_sign_hex% %s_data_enc_sign_bin% >> %current_log_file% 2>>&1
 
 exit 0
 

@@ -61,6 +61,12 @@
 
  
 
+
+
+
+ 
+
+
  
 
 
@@ -232,8 +238,8 @@
 define memory mem with size = 4G;
 
 define region BL2_CODE_region        = mem:[from ((((0x0C000000)) + ((0x0000)))) size ((0x18000))];
-define region S_CODE_region          = mem:[from ((((0x0C000000)) + ((((((0x0000)+(0x18000)) + (0x0))) + (0x400))))) size (((((0x40000)+(0x40000)) - (((0x0000)+(0x18000)) + (0x0))) - (0x400) - (0x2000)))];
-define region NS_CODE_region         = mem:[from ((((0x08000000)) + ((((((0x0000)+(0x18000)) + (0x0)) + (((0x40000)+(0x40000)) - (((0x0000)+(0x18000)) + (0x0)))) + (0x400))))) size (((0x0) - (0x400) - (0x2000)))];
+define region S_CODE_region          = mem:[from ((((0x0C000000)) + ((((((0x0000)+(0x18000)) + (0x0))) + (0x400))))) size ((((0x80000) - (((0x0000)+(0x18000)) + (0x0))) - (0x400) - (0x2000)))];
+define region NS_CODE_region         = mem:[from ((((0x08000000)) + ((((((0x0000)+(0x18000)) + (0x0)) + ((0x80000) - (((0x0000)+(0x18000)) + (0x0)))) + (0x400))))) size (((0x0) - (0x400) - (0x2000)))];
 
 define region BL2_RAM_region         = mem:[from ((0x30040000)) size ((0x10000))];
 define region S_RAM_region           = mem:[from ((0x30040000)) size (((0x10000)))];

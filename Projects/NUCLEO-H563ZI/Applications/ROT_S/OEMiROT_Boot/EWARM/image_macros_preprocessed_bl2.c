@@ -67,6 +67,12 @@
 
  
 
+
+
+
+ 
+
+
  
 
 
@@ -24995,7 +25001,7 @@ enum image_attributes
   RE_IMAGE_FLASH_NON_SECURE_IMAGE_SIZE = (NON_SECURE_IMAGE_MAX_SIZE+(0x2A000)),
   RE_CODE_IMAGE_ASSEMBLY = (0x1),
   RE_ADDRESS_SECURE_START = ((((0x0C000000)) + ((((((0x0000)+(0x18000)) + (0x0))) + (0x400))))) - (0x400),
-  RE_ADDRESS_NON_SECURE_START = ((((0x08000000)) + ((((((0x0000)+(0x18000)) + (0x0)) + (((0x40000)+(0x40000)) - (((0x0000)+(0x18000)) + (0x0)))) + (0x400))))) - (0x400),
+  RE_ADDRESS_NON_SECURE_START = ((((0x08000000)) + ((((((0x0000)+(0x18000)) + (0x0)) + ((0x80000) - (((0x0000)+(0x18000)) + (0x0)))) + (0x400))))) - (0x400),
  
   RE_IMAGE_FLASH_ADDRESS_SECURE = ((0x08000000)+(((0x0000)+(0x18000)) + (0x0))),
   RE_IMAGE_FLASH_ADDRESS_SECURE_MAGIC_INSTALL_REQ = ((0x08000000)+(((0x0000)+(0x18000)) + (0x0))+((0x2A000))-0x10),
@@ -25025,9 +25031,10 @@ enum image_attributes
   RE_BL2_BOOT_ADDRESS = ((((((0x0C000000)) + ((0x0000)))))),
    
    
-  RE_BL2_SEC1_END = (((0x40000)+(0x40000))-0x1),
-  RE_BL2_SEC2_END = (((0x40000)+(0x40000))-0x1),
+  RE_BL2_SEC1_END = ((0x100000)-0x1),
+  RE_BL2_SEC2_END = ((0x100000)-0x1),
   RE_BL2_SEC2_START = (0x0),
+  
   RE_BL2_WRP_START = ((0x0000)),
 
   RE_BL2_HDP_START = 0x0,
@@ -25050,8 +25057,8 @@ enum image_attributes
   RE_AREA_6_SIZE = (0x0),
   RE_AREA_7_OFFSET = FLASH_AREA_7_OFFSET,
   RE_AREA_7_SIZE = FLASH_AREA_7_SIZE,
-  RE_S_NS_PARTITION_SIZE = ((((0x40000)+(0x40000)) - (((0x0000)+(0x18000)) + (0x0)))+(0x0)),
-  RE_FLASH_B_SIZE = (0x40000),
+  RE_S_NS_PARTITION_SIZE = (((0x80000) - (((0x0000)+(0x18000)) + (0x0)))+(0x0)),
+  RE_FLASH_B_SIZE = (0x100000),
 
   RE_CRYPTO_SCHEME = 0x2,
   RE_ENCRYPTION = (0x1),

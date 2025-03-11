@@ -54,7 +54,7 @@
 
 #define FLASH_S_DATA_PARTITION_SIZE    0x0   /* secure data partition size */
 
-#define FLASH_B_SIZE                   0x40000   /* flash bank size: 1 MBytes*/
+#define FLASH_B_SIZE                   0x100000   /* flash bank size: 1 MBytes*/
 
 #define FLASH_TOTAL_SIZE               (FLASH_B_SIZE+FLASH_B_SIZE) /* total flash size: 2 MBytes */
 

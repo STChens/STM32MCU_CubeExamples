@@ -62,6 +62,12 @@
 
  
 
+
+
+
+ 
+
+
  
 
 
@@ -232,10 +238,10 @@
  
  
  
-define symbol __ICFEDIT_intvec_start__ = (((0x0C000000) + (((((0x40000)+(0x40000)) - (0x2000)) - (0xC000)))));
+define symbol __ICFEDIT_intvec_start__ = (((0x0C000000) + ((((0x80000) - (0x2000)) - (0xC000)))));
  
-define symbol __ICFEDIT_region_ROM_start__ = (((0x0C000000) + (((((0x40000)+(0x40000)) - (0x2000)) - (0xC000)))));
-define symbol __ICFEDIT_region_ROM_end__   = ((((0x0C000000) + (((((0x40000)+(0x40000)) - (0x2000)) - (0xC000))))) + (((0xC000))) -1);
+define symbol __ICFEDIT_region_ROM_start__ = (((0x0C000000) + ((((0x80000) - (0x2000)) - (0xC000)))));
+define symbol __ICFEDIT_region_ROM_end__   = ((((0x0C000000) + ((((0x80000) - (0x2000)) - (0xC000))))) + (((0xC000))) -1);
 define symbol __ICFEDIT_region_RAM_start__ = ((((0x30000000)) + ((0x40000))));
 define symbol __ICFEDIT_region_RAM_end__   = (((((0x30000000)) + ((0x40000)))) + ((0x10000)) - 1);
 

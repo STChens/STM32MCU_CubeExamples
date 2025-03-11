@@ -115,13 +115,13 @@ int main(int argc, char **argv)
   - Low Level Initialization
   */
   HAL_Init();
-  
+  HAL_MPU_Disable();
 
   /* Configure Communication module */
   COM_Init();
 
   printf("\r\n======================================================================");
-  printf("\r\n=              (C) COPYRIGHT 2021 STMicroelectronics                 =");
+  printf("\r\n=              (C) COPYRIGHT 2025 STMicroelectronics                 =");
   printf("\r\n=                                                                    =");
   printf("\r\n=                          LOCAL LOADER                              =");
   printf("\r\n======================================================================");

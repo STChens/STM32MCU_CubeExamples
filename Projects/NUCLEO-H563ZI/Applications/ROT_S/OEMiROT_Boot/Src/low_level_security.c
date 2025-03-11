@@ -754,7 +754,7 @@ void LL_SECU_CheckStaticProtections(void)
 
   /* Check bank1 secure flash protection */
   start = 0;
-  end = (S_IMAGE_PRIMARY_PARTITION_OFFSET  + FLASH_S_PARTITION_SIZE - 1) / PAGE_SIZE;
+  end = (FLASH_B_SIZE - 1) / PAGE_SIZE; // full bank shall be secure 
   if (end > PAGE_MAX_NUMBER_IN_BANK)
   {
     end = PAGE_MAX_NUMBER_IN_BANK;
@@ -777,7 +777,7 @@ void LL_SECU_CheckStaticProtections(void)
 
   /* Check bank2 secure flash protection */
   start = 0;
-  end = (S_IMAGE_PRIMARY_PARTITION_OFFSET  + FLASH_S_PARTITION_SIZE - 1) / PAGE_SIZE;
+  end = (FLASH_B_SIZE - 1) / PAGE_SIZE;
   if (end > PAGE_MAX_NUMBER_IN_BANK)
   {
     end = end - (PAGE_MAX_NUMBER_IN_BANK + 1);

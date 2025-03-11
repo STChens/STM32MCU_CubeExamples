@@ -65,12 +65,21 @@
 /* Flash layout info for BL2 bootloader */
 #define FLASH_AREA_IMAGE_SECTOR_SIZE    (0x2000)     /* 8 KB */
 #define FLASH_AREA_WRP_GROUP_SIZE       (0x8000)     /* 32 KB */
-#if defined(DEVICE_1M_FLASH_ENABLE)
+#if defined(DEVICE_512K_FLASH_ENABLE)
 #define FLASH_B_SIZE                    (0x40000)   /* 256 KBytes*/
+#elif defined(DEVICE_1M_FLASH_ENABLE)
+#define FLASH_B_SIZE                    (0x80000)   /* 512 KBytes*/
 #else
-#define FLASH_B_SIZE                    (0x40000) /* 256 MBytes */
+#define FLASH_B_SIZE                    (0x100000) /* 1 MBytes */
 #endif /* DEVICE_1M_FLASH_ENABLE */
 #define FLASH_TOTAL_SIZE                (FLASH_B_SIZE+FLASH_B_SIZE) /* 512 KBytes*/
+
+/* FLASH_TOTAL_SIZE_LIMIT is used to limit the user flash size that can be used
+   This is to simmulate the H5 devices with smaller flash size
+   Here FLASH_TOTAL_SIZE_LIMIT is defined as 512KB to simulate PN with 512KB flash
+ */
+#define FLASH_TOTAL_SIZE_LIMIT          (0x80000) 
+
 #define FLASH_BASE_ADDRESS              (0x08000000)
 #define FLASH_BASE_ADDRESS_S              (0x0C000000)
 
@@ -131,7 +140,7 @@
 #endif /* ((FLASH_AREA_BL2_OFFSET+FLASH_AREA_BL2_SIZE) % FLASH_AREA_WRP_GROUP_SIZE) != 0 */
 
 /* BL2 partitions size */
-#define FLASH_S_PARTITION_SIZE          (FLASH_TOTAL_SIZE - FLASH_AREA_0_OFFSET) /* 512 KB for S partition */
+#define FLASH_S_PARTITION_SIZE          (FLASH_TOTAL_SIZE_LIMIT - FLASH_AREA_0_OFFSET) /* 512 KB for S partition */
 #define FLASH_NS_PARTITION_SIZE         (0x0) /* 0 KB for NS partition */
 #define FLASH_PARTITION_SIZE            (FLASH_S_PARTITION_SIZE+FLASH_NS_PARTITION_SIZE)
 
@@ -255,7 +264,7 @@ This value may change if the layout changes, in such case, please recalculate th
 
 /* EDATA area */
 #define FLASH_AREA_EDATA_SIZE    (0x2000) /* 8KB at the end of the flash is reserved for EDATA */
-#define FLASH_AREA_EDATA_OFFSET  (FLASH_TOTAL_SIZE - FLASH_AREA_EDATA_SIZE) 
+#define FLASH_AREA_EDATA_OFFSET  (FLASH_TOTAL_SIZE_LIMIT - FLASH_AREA_EDATA_SIZE) 
 
 /* User loader area */
 #if (defined MCUBOOT_EXT_LOADER && !defined USE_SYTEM_BOOTLOADER)

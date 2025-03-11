@@ -119,15 +119,10 @@ enum image_attributes
   RE_BL2_BOOT_ADDRESS = (BL2_BOOT_VTOR_ADDR),
   /* area for programming hardening on page */
   /* config SECWM as full secure for bank 1 and bank 2 */
-#if 0 /* Change to #if 1 on H5 with 512 flash size in total */
   RE_BL2_SEC1_END = (FLASH_B_SIZE-0x1),
   RE_BL2_SEC2_END = (FLASH_B_SIZE-0x1),
   RE_BL2_SEC2_START = (0x0),
-#else /* Since the test is done on H563 with bigger flash size in both banks, we set the SECWM of each bank according to total flash size */
-  RE_BL2_SEC1_END = (FLASH_TOTAL_SIZE-0x1),
-  RE_BL2_SEC2_END = (FLASH_TOTAL_SIZE-0x1),
-  RE_BL2_SEC2_START = (0x0),
-#endif
+  
   RE_BL2_WRP_START = (FLASH_AREA_BL2_OFFSET),
 
   RE_BL2_HDP_START = 0x0,
