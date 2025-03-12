@@ -51,7 +51,7 @@ set xml_fw_app_item_name="Firmware binary input file"
 set xml_fw_data_item_name="Data binary input file"
 set xml_output_item_name="Image output file"
 set xml_enc_item_name="Encryption key"
-set s_sct_file="%appli_dir%\MDK-ARM\Secure\stm32h5xx_app.sct"
+set s_sct_file="%appli_dir%\MDK-ARM\stm32h5xx_app.sct"
 set code_size="Firmware area size"
 set data_size="Data download slot size"
 set scratch_sector_number="Number of scratch sectors"
@@ -182,10 +182,6 @@ set "command=%python%%applicfg% flash --layout %preprocess_bl2_file% -b image_s_
 IF !errorlevel! NEQ 0 goto :error
 
 set "command=%python%%applicfg% definevalue --layout %preprocess_bl2_file% -m RE_AREA_0_OFFSET -n S_CODE_OFFSET %s_sct_file% --vb >> %current_log_file% 2>&1"
-%command%
-IF !errorlevel! NEQ 0 goto :error
-
-set "command=%python%%applicfg% linker --layout %preprocess_bl2_file% -m RE_IMAGE_FLASH_SECURE_IMAGE_SIZE -n S_CODE_SIZE %s_icf_file% --vb >> %current_log_file% 2>&1"
 %command%
 IF !errorlevel! NEQ 0 goto :error
 
