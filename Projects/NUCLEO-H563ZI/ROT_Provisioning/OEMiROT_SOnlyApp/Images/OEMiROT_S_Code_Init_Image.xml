@@ -139,7 +139,7 @@
 	</Param>
 	<Output>
 		<Name>Image output file</Name>
-		<Value>..\..\..\Applications\ROT_S\OEMiROT_Appli\Binary\rot_tz_s_app_enc_sign.hex</Value>
+		<Value>..\..\..\Applications\ROT_S\OEMiROT_Appli\Binary\rot_tz_s_app_init_sign.hex</Value>
 		<Default>../../../Applications/ROT/OEMiROT_Appli_TrustZone/Binary/rot_tz_s_app_enc_sign.hex</Default>
 	</Output>
   </McubootFormat>

@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-#define S_CODE_OFFSET 0x00000000    /* Firmware execution area offset from STiROT_Config.xml */
-#define S_CODE_SIZE 0x00020000      /* Firmware area size from STiROT_Config.xml */
+#define S_CODE_OFFSET 0x00018000    /* Firmware execution area offset from STiROT_Config.xml */
+#define S_CODE_SIZE 0x00029800      /* Firmware area size from STiROT_Config.xml */
 #define IMAGE_HEADER_SIZE 0x400     /* mcuboot header size */
 
 #define CODE_START 0x0C000000 + S_CODE_OFFSET + IMAGE_HEADER_SIZE
