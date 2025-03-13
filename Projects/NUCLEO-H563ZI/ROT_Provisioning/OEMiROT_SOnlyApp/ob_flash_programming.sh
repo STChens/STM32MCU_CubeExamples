@@ -1,11 +1,11 @@
 #!/bin/bash -
-source ../env.sh
+source ../env_sonlyapp.sh
 
 script_error_file="error"
 sec1_start=0
-sec1_end=0xE
-sec2_start=0x7F
-sec2_end=0x0
+sec1_end=0x7F
+sec2_start=0x0
+sec2_end=0x7F
 wrpgrp1=0xFFFFFFF8
 wrpgrp2=0xFFFFFFFF
 hdp1_start=0
@@ -15,13 +15,10 @@ hdp2_end=0x0
 boot_lck=0xB4
 bootaddress=0xC000000
 bootob=0xC0000
-app_image_number=2
 s_data_image_number=0
-ns_data_image_number=0
+loader_image_number=1
 
 s_code_image=$oemirot_appli_secure
-ns_code_image=$oemirot_appli_non_secure
-one_code_image=$oemirot_appli_assembly_sign
 s_data_image="s_data_init_sign.hex"
 ns_data_image="ns_data_init_sign.hex"
 
@@ -77,26 +74,11 @@ if [ $? -ne 0 ]; then error; return 1; fi
 # ==================================================== Download images ====================================================================
 echo "Application images programming in download slots"
 
-if [ "$app_image_number" == "2" ]; then
-    action="Write Appli Secure"
-    echo "$action $appli_dir/Binary/$s_code_image"
-    "$stm32programmercli" $connect_no_reset -d "$appli_dir/Binary/$s_code_image" -v
-    if [ $? -ne 0 ]; then error; return 1; fi
-    echo "TZ Appli Secure Written"
-    action="Write Appli NonSecure"
-    echo "$action"
-    "$stm32programmercli" $connect_no_reset -d "$appli_dir/Binary/$ns_code_image" -v
-    if [ $? -ne 0 ]; then error; return 1; fi
-    echo "TZ Appli NonSecure Written"
-fi
-
-if [ "$app_image_number" == "1" ]; then
-    action="Write One image Appli"
-    echo "$action"
-    "$stm32programmercli" $connect_no_reset -d "$appli_dir/Binary/$one_code_image" -v
-    if [ $? -ne 0 ]; then error; return 1; fi
-    echo "TZ Appli Written"
-fi
+action="Write One image Appli"
+echo "$action"
+"$stm32programmercli" $connect_no_reset -d "$appli_dir/Binary/$s_code_image" -v
+if [ $? -ne 0 ]; then error; return 1; fi
+echo "TZ Appli Written"
 
 if [ "$s_data_image_number" == "1" ]; then
     action="Write Secure Data"
@@ -111,22 +93,16 @@ if [ "$s_data_image_number" == "1" ]; then
     if [ $? -ne 0 ]; then error; return 1; fi
 fi
 
-if [ $ns_data_image_number -eq 1 ]; then
-    action="Write non Secure Data"
+if [ $loader_image_number -eq 1 ]; then
+    action="Write Loader image"
     echo "$action"
-
-    if [ ! -f "$rot_provisioning_path/OEMiROT/Binary/$ns_data_image" ]; then
-        echo "Error: ns_data_enc_sign.hex does not exist! use TPC to generate it"
-        error
-    fi
-
-    "$stm32programmercli" $connect_no_reset -d "$rot_provisioning_path/OEMiROT/Binary/$ns_data_image" -v
+    "$stm32programmercli" $connect_no_reset -d $cube_fw_path/Projects/NUCLEO-H563ZI/Applications/ROT_S/Loader/Binary/Loader.hex -v
     if [ $? -ne 0 ]; then error; return 1; fi
 fi
 
 action="Write OEMiROT_Boot"
 echo "$action"
-"$stm32programmercli" "$connect_no_reset" -d "$cube_fw_path/Projects/NUCLEO-H563ZI/Applications/ROT/OEMiROT_Boot/Binary/OEMiROT_Boot.bin" $bootaddress -v
+"$stm32programmercli" "$connect_no_reset" -d "$cube_fw_path/Projects/NUCLEO-H563ZI/Applications/ROT_S/OEMiROT_Boot/Binary/OEMiROT_Boot.bin" $bootaddress -v
 if [ $? -ne 0 ]; then error; return 1; fi
 echo "OEMiROT_Boot Written"
 

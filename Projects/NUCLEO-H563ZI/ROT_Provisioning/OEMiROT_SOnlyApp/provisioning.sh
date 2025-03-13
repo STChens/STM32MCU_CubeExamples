@@ -2,7 +2,7 @@
 # Getting the CubeProgammer_cli path
 if [ $# -ge 1 ]; then mode=$1; else mode=MANUAL; fi
 
-source ../env.sh
+source ../env_sonlyapp.sh
 
 # Environment variable for AppliCfg
 SCRIPT=$(readlink -f $0)
@@ -21,9 +21,7 @@ provisioning_log="provisioning.log"
 ## Get config updated by OEMiROT_Boot
 tmp_file=$projectdir/img_config.sh
 s_data_xml=$projectdir"/Images/OEMiROT_S_Data_Image.xml"
-ns_data_xml=$projectdir"/Images/OEMiROT_NS_Data_Image.xml"
 s_data_init_xml=$projectdir"/Images/OEMiROT_S_Data_Init_Image.xml"
-ns_data_init_xml=$projectdir"/Images/OEMiROT_NS_Data_Init_Image.xml"
 
 # Initial configuration
 product_state=OPEN
@@ -202,7 +200,7 @@ echo
 # Path validation
 action="Validating OEMiROT boot path project"
 
-if [[ ! $oemirot_boot_path_project =~ "OEMiROT_Appli_TrustZone" ]]; then
+if [[ ! $oemirot_boot_path_project =~ "OEMiROT_Appli" ]]; then
   echo "====="
   echo "===== Wrong Boot path: $oemirot_boot_path_project"
   echo "===== please modify the env.sh to the right path"
@@ -273,19 +271,6 @@ if [ $isGeneratedByCubeMX != "true" ]; then
         if [ $? != "0" ]; then step_error; fi
         "$stm32tpccli" -pb $s_data_init_xml >> $provisioning_log
         if [ $? != "0" ]; then step_error; fi
-    fi
-
-    echo "   * Data non secure generation (if Data non secure image is enabled)"
-    echo "       Select OEMiROT_NS_Data_Image.xml(Default path is /ROT_Provisioning/OEMiROT/Images/OEMiROT_NS_Data_Image.xml)"
-    echo "       Generate the ns_data_enc_sign.hex image"
-    echo "       Press any key to continue..."
-    echo
-    if [ "$mode" != "AUTO" ]; then read -p "" -n1 -s; fi
-    if [ $ns_data_image_number != "0" ]; then
-      "$stm32tpccli" -pb $ns_data_xml >> $provisioning_log
-      if [ $? != "0" ]; then step_error; fi
-      "$stm32tpccli" -pb $ns_data_init_xml >> $provisioning_log
-      if [ $? != "0" ]; then step_error; fi
     fi
 fi
 if [ $isGeneratedByCubeMX == "true" ]; then
