@@ -31,9 +31,11 @@
 **
 ******************************************************************************
 */
-S_CODE_OFFSET = 0x00000000;       /* This define is updated automatically by SMAK provisioning script */
-S_CODE_SIZE = 0x00020000;         /* This define is updated automatically by SMAK provisioning script */
-IMAGE_HEADER_SIZE = 0x400;       /* mcuboot header size */
+#include "region_defs.h"
+
+/* S_CODE_OFFSET = 0x00180000;*/       /* This define is updated automatically by SMAK provisioning script */
+/* S_CODE_SIZE = 0x00020000;  */       /* This define is updated automatically by SMAK provisioning script */
+/* IMAGE_HEADER_SIZE = 0x400; */       /* mcuboot header size */
 
 /* Entry Point */
 ENTRY(Reset_Handler)
@@ -48,7 +50,7 @@ _Min_Stack_Size = 0x400; /* required amount of stack */
 MEMORY
 {
   RAM    (xrw)    : ORIGIN = 0x30000000,    LENGTH = 0x40000    /* Memory is divided. Actual start is 0x30000000 and actual length is 256K */
-  FLASH    (rx)    : ORIGIN = (0xc000000 + S_CODE_OFFSET + IMAGE_HEADER_SIZE),    LENGTH = S_CODE_SIZE - IMAGE_HEADER_SIZE  /* Memory is divided. Actual start is 0x8000000 and actual length is 2048K */
+  FLASH    (rx)    : ORIGIN = (S_CODE_START),    LENGTH = S_CODE_SIZE  /* Memory is divided. Actual start is 0x8000000 and actual length is 2048K */
 }
 
 /* Sections */
