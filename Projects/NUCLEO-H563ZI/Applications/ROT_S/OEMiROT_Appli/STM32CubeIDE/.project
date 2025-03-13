@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>HASH_SHA256</name>
+	<name>OEMiROT_App</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -33,14 +33,9 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>HASH_SHA256.ioc</name>
+			<name>OEMiROT_App.ioc</name>
 			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/HASH_SHA256.ioc</locationURI>
-		</link>
-		<link>
-			<name>Doc/README.md</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/README.md</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/OEMiROT_App.ioc</locationURI>
 		</link>
 		<link>
 			<name>Application/User/main.c</name>
