@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>SBSFU_Loader_Secure</name>
+	<name>Loader</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -31,6 +31,21 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>Application/User/com.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Src/com.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/common.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Src/common.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/fw_update_app.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Src/fw_update_app.c</locationURI>
+		</link>
+		<link>
 			<name>Application/User/low_level_device.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Src/low_level_device.c</locationURI>
@@ -46,11 +61,6 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Src/main.c</locationURI>
 		</link>
 		<link>
-			<name>Application/User/secure_nsc.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Src/secure_nsc.c</locationURI>
-		</link>
-		<link>
 			<name>Application/User/startup_stm32h5xx.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Src/startup_stm32h5xx.c</locationURI>
@@ -59,6 +69,11 @@
 			<name>Application/User/tick.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Src/tick.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/ymodem.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Src/ymodem.c</locationURI>
 		</link>
 		<link>
 			<name>Drivers/CMSIS/system_stm32h5xx.c</name>
@@ -74,6 +89,16 @@
 			<name>Drivers/STM32H5xx_HAL_Driver/stm32h5xx_hal_cortex.c</name>
 			<type>1</type>
 			<locationURI>PARENT-6-PROJECT_LOC/Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_cortex.c</locationURI>
+		</link>
+		<link>
+			<name>Drivers/STM32H5xx_HAL_Driver/stm32h5xx_hal_crc.c</name>
+			<type>1</type>
+			<locationURI>PARENT-6-PROJECT_LOC/Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_crc.c</locationURI>
+		</link>
+		<link>
+			<name>Drivers/STM32H5xx_HAL_Driver/stm32h5xx_hal_crc_ex.c</name>
+			<type>1</type>
+			<locationURI>PARENT-6-PROJECT_LOC/Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_crc_ex.c</locationURI>
 		</link>
 		<link>
 			<name>Drivers/STM32H5xx_HAL_Driver/stm32h5xx_hal_dma.c</name>
@@ -124,6 +149,16 @@
 			<name>Drivers/STM32H5xx_HAL_Driver/stm32h5xx_hal_rcc_ex.c</name>
 			<type>1</type>
 			<locationURI>PARENT-6-PROJECT_LOC/Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_rcc_ex.c</locationURI>
+		</link>
+		<link>
+			<name>Drivers/STM32H5xx_HAL_Driver/stm32h5xx_hal_uart.c</name>
+			<type>1</type>
+			<locationURI>PARENT-6-PROJECT_LOC/Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_uart.c</locationURI>
+		</link>
+		<link>
+			<name>Drivers/STM32H5xx_HAL_Driver/stm32h5xx_hal_uart_ex.c</name>
+			<type>1</type>
+			<locationURI>PARENT-6-PROJECT_LOC/Drivers/STM32H5xx_HAL_Driver/Src/stm32h5xx_hal_uart_ex.c</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

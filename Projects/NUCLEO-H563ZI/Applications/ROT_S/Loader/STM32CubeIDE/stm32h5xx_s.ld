@@ -25,10 +25,11 @@
 MEMORY
 {
   FLASH (rx)  : ORIGIN = LOADER_S_CODE_START, LENGTH = LOADER_S_CODE_SIZE
-  ROM_NSC (rx): ORIGIN = LOADER_CMSE_VENEER_REGION_START, LENGTH = LOADER_CMSE_VENEER_REGION_SIZE
   RAM   (rwx) : ORIGIN = LOADER_S_DATA_START, LENGTH = LOADER_S_DATA_SIZE
 }
 
+/* Highest address of the user mode stack */
+_estack = ORIGIN(RAM) + LENGTH(RAM); /* end of "RAM" Ram type memory */
 __heap_size__  = LOADER_S_HEAP_SIZE;
 __msp_stack_size__ = LOADER_S_MSP_STACK_SIZE;
 
@@ -164,18 +165,12 @@ SECTIONS
     {
         __end__ = .;
         PROVIDE(end = .);
+    	PROVIDE ( _end = . );        
         __HeapBase = .;
         . += __heap_size__;
         __HeapLimit = .;
         __heap_limit = .; /* Add for _sbrk */
     } > RAM
-
-    .gnu.sgstubs :
-    {
-    . = ALIGN(8);
-    *(.gnu.sgstubs*)   /* Secure Gateway stubs */
-    . = ALIGN(8);
-    } >ROM_NSC
 
     PROVIDE(__stack = Image$$ARM_LIB_STACK_MSP$$ZI$$Limit);
     PROVIDE(__StackTop = Image$$ARM_LIB_STACK_MSP$$ZI$$Limit);

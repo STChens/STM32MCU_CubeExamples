@@ -10,7 +10,7 @@
  ******************************************************************************
  * @attention
  *
- * Copyright (c) 2021 STMicroelectronics.
+ * Copyright (c) 2023 STMicroelectronics.
  * All rights reserved.
  *
  * This software is licensed under terms that can be found in the LICENSE file
@@ -54,8 +54,8 @@ void *_sbrk(ptrdiff_t incr)
 {
   extern uint8_t _end; /* Symbol defined in the linker script */
   extern uint8_t _estack; /* Symbol defined in the linker script */
-  extern uint32_t _Min_Stack_Size; /* Symbol defined in the linker script */
-  const uint32_t stack_limit = (uint32_t)&_estack - (uint32_t)&_Min_Stack_Size;
+  extern uint32_t __msp_stack_size__; /* Symbol defined in the linker script */
+  const uint32_t stack_limit = (uint32_t)&_estack - (uint32_t)&__msp_stack_size__;
   const uint8_t *max_heap = (uint8_t *)stack_limit;
   uint8_t *prev_heap_end;
 
