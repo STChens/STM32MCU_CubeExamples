@@ -137,7 +137,7 @@
 	</Param>
 	<Output>
 		<Name>Image output file</Name>
-		<Value>C:\Users\chens\STM32Cube\Repository\H5_V1.4.0\Projects\NUCLEO-H563ZI\ROT_Provisioning\OEMiROT_SOnlyApp\Binary\s_data_init_sign.hex</Value>
+		<Value>C:/Users/chens/STM32Cube/Repository/H5_V1.4.0/Projects/NUCLEO-H563ZI/ROT_Provisioning/OEMiROT_SOnlyApp/Binary/s_data_init_sign.hex</Value>
 		<Default>../Binary/s_data_enc_sign.bin</Default>
 	</Output>
   </McubootFormat>

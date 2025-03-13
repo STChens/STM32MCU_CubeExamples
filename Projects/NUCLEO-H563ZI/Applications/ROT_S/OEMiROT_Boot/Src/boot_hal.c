@@ -497,7 +497,6 @@ int32_t boot_platform_init(void)
 #ifdef OEMIROT_DEV_MODE
     /* Init for log */
     stdio_init();
-    BOOT_LOG_INF("\r\nBL2 Platform Init. Build: %s:%s", __DATE__, __TIME__);
 #endif /*  OEMIROT_DEV_MODE */
 
 #ifdef OEMIROT_ICACHE_ENABLE
@@ -564,6 +563,8 @@ int32_t boot_platform_init(void)
         boot_platform_noimage();
     }
 #endif /* MCUBOOT_EXT_LOADER */
+
+    BOOT_LOG_INF("BL2 Platform Init done. Build: %s:%s", __DATE__, __TIME__);
     return 0;
 }
 
