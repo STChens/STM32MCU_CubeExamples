@@ -134,6 +134,10 @@ SECTIONS
     PROVIDE_HIDDEN (__fini_array_end = .);
     . = ALIGN(4);
   } >FLASH
+  
+  my_special_section S_CODE_START + S_CODE_SIZE - 0x1000 : {
+    *(.my_special_section)
+  } >FLASH
 
   /* Used by the startup to initialize data */
   _sidata = LOADADDR(.data);

@@ -25,6 +25,9 @@
  */
 
 /* Flash layout configuration : begin ****************************************/
+#define MCUBOOT_PRIMARY_ONLY	   /* Define: no download slot
+                                      Undefined: active slot + download slot */
+
 #define MCUBOOT_OVERWRITE_ONLY     /* Defined: the FW installation uses overwrite method.
                                       UnDefined: The FW installation uses swap mode. */
 
@@ -78,7 +81,13 @@
    This is to simmulate the H5 devices with smaller flash size
    Here FLASH_TOTAL_SIZE_LIMIT is defined as 512KB to simulate PN with 512KB flash
  */
+#if defined(DEVICE_512K_FLASH_ENABLE)
 #define FLASH_TOTAL_SIZE_LIMIT          (0x80000) 
+#elif defined(DEVICE_1M_FLASH_ENABLE)
+#define FLASH_TOTAL_SIZE_LIMIT          (0x100000)
+#else
+#define FLASH_TOTAL_SIZE_LIMIT          (FLASH_TOTAL_SIZE)
+#endif
 
 #define FLASH_BASE_ADDRESS              (0x08000000)
 #define FLASH_BASE_ADDRESS_S              (0x0C000000)
@@ -86,7 +95,9 @@
 /* Flash area IDs */
 #define FLASH_AREA_0_ID                 (1)
 
+#if !defined MCUBOOT_PRIMARY_ONLY
 #define FLASH_AREA_2_ID                 (3)
+#endif /*#if !defined MCUBOOT_PRIMARY_ONLY*/
 
 #if (MCUBOOT_S_DATA_IMAGE_NUMBER == 1)
 #define FLASH_AREA_4_ID                 (5)
@@ -97,7 +108,6 @@
 #endif /* MCUBOOT_S_DATA_IMAGE_NUMBER == 1 */
 
 #define FLASH_AREA_SCRATCH_ID           (9)
-
 /* Offset and size definitions of the flash partitions that are handled by the
  * bootloader. The image swapping is done between IMAGE_0 and IMAGE_1, SCRATCH
  * is used as a temporary storage during image swapping.
@@ -111,7 +121,7 @@
 #if defined(FLASH_AREA_SCRATCH_ID)
 #define FLASH_AREA_SCRATCH_DEVICE_ID    (FLASH_DEVICE_ID - FLASH_DEVICE_ID)
 #define FLASH_AREA_SCRATCH_OFFSET       (FLASH_AREA_BL2_SIZE)
-#if defined(MCUBOOT_OVERWRITE_ONLY)
+#if defined(MCUBOOT_OVERWRITE_ONLY) || defined (MCUBOOT_PRIMARY_ONLY)
 #define FLASH_AREA_SCRATCH_SIZE         (0x0000) /* Not used in MCUBOOT_OVERWRITE_ONLY mode */
 #else
 #define FLASH_AREA_SCRATCH_SIZE         (0x10000) /* 64 KB */
@@ -146,7 +156,8 @@
 
 /* App FW slot size. 
 This value may change if the layout changes, in such case, please recalculate the size using the xlsx file */
-#define FLASH_S_ACTIVESLOT_SIZE         (0x2A000) /* 168 KB for Code slot of secure only app. */
+//#define FLASH_S_ACTIVESLOT_SIZE         (0x2A000) /* 168 KB for Code slot of secure only app. */
+#define FLASH_S_ACTIVESLOT_SIZE         ((0x1D4000))
 
 #define FLASH_MAX_APP_PARTITION_SIZE    FLASH_PARTITION_SIZE
 #if (MCUBOOT_S_DATA_IMAGE_NUMBER == 1)
@@ -288,12 +299,15 @@ This value may change if the layout changes, in such case, please recalculate th
 /*
  * The maximum number of status entries supported by the bootloader.
  */
+#if !defined MCUBOOT_PRIMARY_ONLY
 #if defined(MCUBOOT_OVERWRITE_ONLY)
 #define MCUBOOT_STATUS_MAX_ENTRIES        (0)
 #else /* not MCUBOOT_OVERWRITE_ONLY */
 #define MCUBOOT_STATUS_MAX_ENTRIES        (((FLASH_MAX_PARTITION_SIZE - 1) / \
                                             FLASH_AREA_SCRATCH_SIZE) + 1)
 #endif /* MCUBOOT_OVERWRITE_ONLY */
+#endif /* #if !defined MCUBOOT_PRIMARY_ONLY */
+
 /* Maximum number of image sectors supported by the bootloader. */
 #define MCUBOOT_MAX_IMG_SECTORS           ((FLASH_MAX_PARTITION_SIZE) / \
                                            FLASH_AREA_IMAGE_SECTOR_SIZE)

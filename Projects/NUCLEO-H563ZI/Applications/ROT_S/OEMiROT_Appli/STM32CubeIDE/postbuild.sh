@@ -47,7 +47,7 @@ s_data_init_sign_hex="$provisioningdir/OEMiROT_SOnlyApp/Binary/s_data_init_sign.
 
 #Variables updated by OEMiROT_Boot postbuild
 app_image_number=1
-image_s_size=0x2A000
+image_s_size=0x1D4000
 
 applicfg="$cube_fw_path/Utilities/PC_Software/ROT_AppliConfig/dist/AppliCfg.exe"
 uname | grep -i -e windows -e mingw

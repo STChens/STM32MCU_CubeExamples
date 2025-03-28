@@ -54,6 +54,12 @@ __ALIGN_BEGIN uint8_t aExpectSHA256Digest[32] __ALIGN_END = {0x02, 0xfc, 0xa4, 0
                                                                     0xb2, 0x48, 0xf1, 0xf9, 0x99, 0xa0, 0x16, 0x81, 0xd1,
                                                                     0xe5, 0x1c, 0x70, 0xfe, 0x7c
 							            };
+__attribute__((section("my_special_section"))) __ALIGN_BEGIN const uint8_t dummy[32] __ALIGN_END = {
+		0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
+		0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
+		0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
+		0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88,
+		};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -282,6 +288,9 @@ static void Run_HASH_TEST(void)
   MX_HASH_Init();
   
 #if defined LOG_ENABLED
+  print_buf("Dummy", dummy, sizeof(dummy));
+  printf("Address of Dummay is %x", &dummy[0]);
+
   while(exit == 0)
   {
 	  uint8_t select = 0;

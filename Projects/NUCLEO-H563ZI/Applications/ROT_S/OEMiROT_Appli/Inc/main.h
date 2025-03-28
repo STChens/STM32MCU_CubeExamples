@@ -44,7 +44,7 @@ extern "C" {
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
 #define S_CODE_OFFSET      0x18000 /* This define is updated automatically from ROT_BOOT project */
-#define S_CODE_SIZE        0x2A000 /* This define is updated automatically from ROT_BOOT project */
+#define S_CODE_SIZE        0x1D4000 /* This define is updated automatically from ROT_BOOT project */
 #define IMAGE_HEADER_SIZE  (0x400)  /* mcuboot headre size */
 #define S_CODE_START       (FLASH_BASE_S + S_CODE_OFFSET + IMAGE_HEADER_SIZE)
 
