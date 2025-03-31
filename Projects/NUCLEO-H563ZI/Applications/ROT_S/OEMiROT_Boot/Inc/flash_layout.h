@@ -157,7 +157,7 @@
 /* App FW slot size. 
 This value may change if the layout changes, in such case, please recalculate the size using the xlsx file */
 //#define FLASH_S_ACTIVESLOT_SIZE         (0x2A000) /* 168 KB for Code slot of secure only app in case of 512KB layout. */
-#define FLASH_S_ACTIVESLOT_SIZE         ((0x1D4000)) /* 1872 KB for Code slot of secure only app in case of 2MB layout. */
+#define FLASH_S_ACTIVESLOT_SIZE         ((0x1D8000)) /* 1888 KB for Code slot of secure only app in case of 2MB layout. */
 
 #define FLASH_MAX_APP_PARTITION_SIZE    FLASH_PARTITION_SIZE
 #if (MCUBOOT_S_DATA_IMAGE_NUMBER == 1)
