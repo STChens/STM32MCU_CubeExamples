@@ -37,6 +37,12 @@ s_code_xml="$project_dir/../../../../ROT_Provisioning/OEMiROT_SOnlyApp/Images/OE
 s_data_xml="$project_dir/../../../../ROT_Provisioning/OEMiROT_SOnlyApp/Images/OEMiROT_S_Data_Image.xml"
 s_code_init_xml="$project_dir/../../../../ROT_Provisioning/OEMiROT_SOnlyApp/Images/OEMiROT_S_Code_Init_Image.xml"
 s_data_init_xml="$project_dir/../../../../ROT_Provisioning/OEMiROT_SOnlyApp/Images/OEMiROT_S_Data_Init_Image.xml"
+if [ $2 == "primary_only" ]; then
+s_code_xml="$project_dir/../../../../ROT_Provisioning/OEMiROT_SOnlyApp/Images/OEMiROT_Code_Image.xml"
+s_data_xml="$project_dir/../../../../ROT_Provisioning/OEMiROT_SOnlyApp/Images/OEMiROT_Data_Image.xml"
+s_code_init_xml="$project_dir/../../../../ROT_Provisioning/OEMiROT_SOnlyApp/Images/OEMiROT_Code_Init_Image.xml"
+s_data_init_xml="$project_dir/../../../../ROT_Provisioning/OEMiROT_SOnlyApp/Images/OEMiROT_Data_Init_Image.xml"
+fi
 appli_flash_layout="$appli_dir/Secure_nsclib/appli_flash_layout.h"
 appli_postbuild="$appli_dir/STM32CubeIDE/postbuild.sh"
 
@@ -194,21 +200,20 @@ $python$applicfg xmlparam --layout  $preprocess_bl2_file -m RE_OVER_WRITE -n "Wr
 if [ $? != 0 ]; then error; fi
 
 $python$applicfg flash --layout $preprocess_bl2_file -b FLASH_SIZE -m RE_FLASH_SIZE $map_properties --vb >> $current_log_file
-echo "222222222222222222" >> $current_log_file 2>&1
 
-$python"$applicfg" xmlval --layout "$preprocess_bl2_file" -m RE_FLASH_AREA_SCRATCH_SIZE -n "$scratch_sector_number" --decimal "$s_code_xml" --vb >> "$current_log_file"
-if [ $? != 0 ]; then error; fi
+if [ $2 != "primary_only" ]; then
+    $python"$applicfg" xmlval --layout "$preprocess_bl2_file" -m RE_FLASH_AREA_SCRATCH_SIZE -n "$scratch_sector_number" --decimal "$s_code_xml" --vb >> "$current_log_file"
+    if [ $? != 0 ]; then error; fi
 
-$python"$applicfg" xmlval -xml "$s_code_xml" -nxml "$code_size" -nxml "$scratch_sector_number" --decimal -e "(((val1+1)/val2)+1)" -cond "val2" -c M "$s_code_xml" --vb >> "$current_log_file"
-if [ $? != 0 ]; then error; fi
+    $python"$applicfg" xmlval -xml "$s_code_xml" -nxml "$code_size" -nxml "$scratch_sector_number" --decimal -e "(((val1+1)/val2)+1)" -cond "val2" -c M "$s_code_xml" --vb >> "$current_log_file"
+    if [ $? != 0 ]; then error; fi
 
-$python"$applicfg" xmlval --layout "$preprocess_bl2_file" -m RE_FLASH_AREA_SCRATCH_SIZE -n "$scratch_sector_number" --decimal "$s_data_xml" --vb >> "$current_log_file"
-if [ $? != 0 ]; then error; fi
+    $python"$applicfg" xmlval --layout "$preprocess_bl2_file" -m RE_FLASH_AREA_SCRATCH_SIZE -n "$scratch_sector_number" --decimal "$s_data_xml" --vb >> "$current_log_file"
+    if [ $? != 0 ]; then error; fi
 
-$python"$applicfg" xmlval -xml "$s_data_xml" -nxml "$data_size" -nxml "$scratch_sector_number" --decimal -e "(((val1+1)/val2)+1)" -cond "val2" -c M "$s_data_xml" --vb >> "$current_log_file"
-if [ $? != 0 ]; then error; fi
-
-echo "333333333333333333333" >> $current_log_file 2>&1
+    $python"$applicfg" xmlval -xml "$s_data_xml" -nxml "$data_size" -nxml "$scratch_sector_number" --decimal -e "(((val1+1)/val2)+1)" -cond "val2" -c M "$s_data_xml" --vb >> "$current_log_file"
+    if [ $? != 0 ]; then error; fi
+fi
 
 # Bypass configuration of appli_flash_layout file if not present
 if [ -f $appli_flash_layout ]; then
@@ -272,13 +277,15 @@ cp $s_code_xml $s_code_init_xml >> $current_log_file 2>&1
 if [ $? != 0 ]; then error; fi
 
 cp $s_data_xml $s_data_init_xml >> $current_log_file 2>&1
-if [ $? != 0 ]; then error; fi
 
-$python$applicfg xmlparam --option add -n "Clear" -t Data -c -c -h 1 -d "" $s_code_init_xml --vb >> $current_log_file 2>&1
 if [ $? != 0 ]; then error; fi
+    if [ $2 != "primary_only" ]; then
+    $python$applicfg xmlparam --option add -n "Clear" -t Data -c -c -h 1 -d "" $s_code_init_xml --vb >> $current_log_file 2>&1
+    if [ $? != 0 ]; then error; fi
 
-$python$applicfg xmlparam --option add -n "Confirm" -t Data -c --confirm -h 1 -d "" $s_code_init_xml --vb >> $current_log_file 2>&1
-if [ $? != 0 ]; then error; fi
+    $python$applicfg xmlparam --option add -n "Confirm" -t Data -c --confirm -h 1 -d "" $s_code_init_xml --vb >> $current_log_file 2>&1
+    if [ $? != 0 ]; then error; fi
+fi
 
 $python$applicfg xmlname -n "$firmware_execution_offset" -c x $s_code_init_xml --vb >> $current_log_file 2>&1
 if [ $? != 0 ]; then error; fi
@@ -286,12 +293,13 @@ if [ $? != 0 ]; then error; fi
 $python$applicfg xmlval --layout $preprocess_bl2_file -m RE_IMAGE_FLASH_ADDRESS_SECURE -c x $s_code_init_xml --vb >> $current_log_file 2>&1
 if [ $? != 0 ]; then error; fi
 
-$python$applicfg xmlparam --option add -n "Clear" -t Data -c -c -h 1 -d "" $s_data_init_xml --vb >> $current_log_file 2>&1
-if [ $? != 0 ]; then error; fi
+if [ $2 != "primary_only" ]; then
+    $python$applicfg xmlparam --option add -n "Clear" -t Data -c -c -h 1 -d "" $s_data_init_xml --vb >> $current_log_file 2>&1
+    if [ $? != 0 ]; then error; fi
 
-$python$applicfg xmlparam --option add -n "Confirm" -t Data -c --confirm -h 1 -d "" $s_data_init_xml --vb >> $current_log_file 2>&1
-if [ $? != 0 ]; then error; fi
-
+    $python$applicfg xmlparam --option add -n "Confirm" -t Data -c --confirm -h 1 -d "" $s_data_init_xml --vb >> $current_log_file 2>&1
+    if [ $? != 0 ]; then error; fi
+fi
 $python$applicfg xmlname -n "$firmware_execution_offset" -c x $s_data_init_xml --vb >> $current_log_file 2>&1
 if [ $? != 0 ]; then error; fi
 

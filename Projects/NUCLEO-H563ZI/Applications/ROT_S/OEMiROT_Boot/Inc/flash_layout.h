@@ -150,14 +150,14 @@
 #endif /* ((FLASH_AREA_BL2_OFFSET+FLASH_AREA_BL2_SIZE) % FLASH_AREA_WRP_GROUP_SIZE) != 0 */
 
 /* BL2 partitions size */
-#define FLASH_S_PARTITION_SIZE          (FLASH_TOTAL_SIZE_LIMIT - FLASH_AREA_0_OFFSET) /* 512 KB for S partition */
+#define FLASH_S_PARTITION_SIZE          (FLASH_TOTAL_SIZE_LIMIT - FLASH_AREA_0_OFFSET - FLASH_AREA_EDATA_SIZE)
 #define FLASH_NS_PARTITION_SIZE         (0x0) /* 0 KB for NS partition */
 #define FLASH_PARTITION_SIZE            (FLASH_S_PARTITION_SIZE+FLASH_NS_PARTITION_SIZE)
 
 /* App FW slot size. 
 This value may change if the layout changes, in such case, please recalculate the size using the xlsx file */
-//#define FLASH_S_ACTIVESLOT_SIZE         (0x2A000) /* 168 KB for Code slot of secure only app. */
-#define FLASH_S_ACTIVESLOT_SIZE         ((0x1D4000))
+//#define FLASH_S_ACTIVESLOT_SIZE         (0x2A000) /* 168 KB for Code slot of secure only app in case of 512KB layout. */
+#define FLASH_S_ACTIVESLOT_SIZE         ((0x1D4000)) /* 1872 KB for Code slot of secure only app in case of 2MB layout. */
 
 #define FLASH_MAX_APP_PARTITION_SIZE    FLASH_PARTITION_SIZE
 #if (MCUBOOT_S_DATA_IMAGE_NUMBER == 1)
@@ -274,7 +274,7 @@ This value may change if the layout changes, in such case, please recalculate th
 #endif /*  (FLASH_AREA_END_OFFSET  % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0 */
 
 /* EDATA area */
-#define FLASH_AREA_EDATA_SIZE    (0x2000) /* 8KB at the end of the flash is reserved for EDATA */
+#define FLASH_AREA_EDATA_SIZE    (0 /*0x2000*/) /* 8KB at the end of the flash is reserved for EDATA */
 #define FLASH_AREA_EDATA_OFFSET  (FLASH_TOTAL_SIZE_LIMIT - FLASH_AREA_EDATA_SIZE) 
 
 /* User loader area */

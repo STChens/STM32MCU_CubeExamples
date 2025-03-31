@@ -30,6 +30,12 @@ s_code_xml="$provisioningdir/OEMiROT_SOnlyApp/Images/OEMiROT_S_Code_Image.xml"
 s_code_init_xml="$provisioningdir/OEMiROT_SOnlyApp/Images/OEMiROT_S_Code_Init_Image.xml"
 s_data_xml="$provisioningdir/OEMiROT_SOnlyApp/Images/OEMiROT_S_Data_Image.xml"
 s_data_init_xml="$provisioningdir/OEMiROT_SOnlyApp/Images/OEMiROT_S_Data_Init_Image.xml"
+if [ $2 == "primary_only" ]; then
+s_code_xml="$provisioningdir/OEMiROT_SOnlyApp/Images/OEMiROT_Code_Image.xml"
+s_code_init_xml="$provisioningdir/OEMiROT_SOnlyApp/Images/OEMiROT_Code_Init_Image.xml"
+s_data_xml="$provisioningdir/OEMiROT_SOnlyApp/Images/OEMiROT_Data_Image.xml"
+s_data_init_xml="$provisioningdir/OEMiROT_SOnlyApp/Images/OEMiROT_Data_Init_Image.xml"
+fi
 bin_dest_dir="$project_dir/../Binary"
 s_code_bin="$project_dir/../Binary/rot_tz_s_app.bin"
 

@@ -13,20 +13,6 @@
 		<Default>../Keys/OEMiRoT_Authentication_S.pem</Default>
 	</Param>
 	<Param>
-		<Name>Confirm</Name>
-		<Type>Data</Type>
-		<Command>--confirm</Command>
-		<Hidden>1</Hidden>
-		<Default></Default>
-	</Param>
-	<Param>
-		<Name>Clear</Name>
-		<Type>Data</Type>
-		<Command>-c</Command>
-		<Hidden>1</Hidden>
-		<Default></Default>
-	</Param>
-	<Param>
 		<Name>Encryption key</Name>
 		<Type>File</Type>
 		<Command>-E</Command>
