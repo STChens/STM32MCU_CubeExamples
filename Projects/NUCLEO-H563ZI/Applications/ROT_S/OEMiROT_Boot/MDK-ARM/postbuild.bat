@@ -6,6 +6,14 @@ set provisioningdir=%cd%
 popd
 call "%provisioningdir%\env_sonlyapp.bat"
 
+if "%~1"=="" (
+    set "primary_only=false"
+) else if "%1" NEQ "primary_only" (
+    set "primary_only=true"
+) else (
+    set "primary_only=false"
+)
+
 :: Enable delayed expansion
 setlocal EnableDelayedExpansion
 
@@ -45,6 +53,13 @@ set s_code_xml="%projectdir%\..\..\..\..\ROT_Provisioning\OEMiROT_SOnlyApp\Image
 set s_data_xml="%projectdir%\..\..\..\..\ROT_Provisioning\OEMiROT_SOnlyApp\Images\OEMiROT_S_Data_Image.xml"
 set s_code_init_xml="%projectdir%\..\..\..\..\ROT_Provisioning\OEMiROT_SOnlyApp\Images\OEMiROT_S_Code_Init_Image.xml"
 set s_data_init_xml="%projectdir%\..\..\..\..\ROT_Provisioning\OEMiROT_SOnlyApp\Images\OEMiROT_S_Data_Init_Image.xml"
+if "%primary_only%" == "true" (
+    set s_code_xml="%projectdir%\..\..\..\..\ROT_Provisioning\OEMiROT_SOnlyApp\Images\OEMiROT_Code_Image.xml"
+    set s_data_xml="%projectdir%\..\..\..\..\ROT_Provisioning\OEMiROT_SOnlyApp\Images\OEMiROT_Data_Image.xml"
+    set s_code_init_xml="%projectdir%\..\..\..\..\ROT_Provisioning\OEMiROT_SOnlyApp\Images\OEMiROT_Code_Init_Image.xml"
+    set s_data_init_xml="%projectdir%\..\..\..\..\ROT_Provisioning\OEMiROT_SOnlyApp\Images\OEMiROT_Data_Init_Image.xml"
+)
+
 set auth_s="Authentication secure key"
 set auth_ns="Authentication non secure key"
 set xml_fw_app_item_name="Firmware binary input file"
@@ -285,22 +300,24 @@ IF !errorlevel! NEQ 0 goto :error
 set "command=%python%%applicfg% flash --layout %preprocess_bl2_file% -b FLASH_SIZE -m RE_FLASH_SIZE %map_properties% --vb >> %current_log_file% 2>&1"
 %command%
 IF !errorlevel! NEQ 0 goto :error
-set "command=%python%%applicfg% xmlval --layout %preprocess_bl2_file% -m RE_FLASH_AREA_SCRATCH_SIZE -n %scratch_sector_number% --decimal %s_code_xml% --vb >> %current_log_file% 2>&1"
-%command%
-IF !errorlevel! NEQ 0 goto :error
 
-set "command=%python%%applicfg% xmlval -xml %s_code_xml% -nxml %code_size% -nxml %scratch_sector_number% --decimal -e (((val1+1)/val2)+1) -cond val2 -c M %s_code_xml% --vb >> %current_log_file% 2>&1"
-%command%
-IF !errorlevel! NEQ 0 goto :error
+if "%primary_only%" == "false" (
+    set "command=%python%%applicfg% xmlval --layout %preprocess_bl2_file% -m RE_FLASH_AREA_SCRATCH_SIZE -n %scratch_sector_number% --decimal %s_code_xml% --vb >> %current_log_file% 2>&1"
+    %command%
+    IF !errorlevel! NEQ 0 goto :error
 
-set "command=%python%%applicfg% xmlval --layout %preprocess_bl2_file% -m RE_FLASH_AREA_SCRATCH_SIZE -n %scratch_sector_number% --decimal %s_data_xml% --vb >> %current_log_file% 2>&1"
-%command%
-IF !errorlevel! NEQ 0 goto :error
+    set "command=%python%%applicfg% xmlval -xml %s_code_xml% -nxml %code_size% -nxml %scratch_sector_number% --decimal -e (((val1+1)/val2)+1) -cond val2 -c M %s_code_xml% --vb >> %current_log_file% 2>&1"
+    %command%
+    IF !errorlevel! NEQ 0 goto :error
 
-set "command=%python%%applicfg% xmlval -xml %s_data_xml% -nxml %data_size% -nxml %scratch_sector_number% --decimal -e (((val1+1)/val2)+1) -cond val2 -c M %s_data_xml% --vb >> %current_log_file% 2>&1"
-%command%
-IF !errorlevel! NEQ 0 goto :error
+    set "command=%python%%applicfg% xmlval --layout %preprocess_bl2_file% -m RE_FLASH_AREA_SCRATCH_SIZE -n %scratch_sector_number% --decimal %s_data_xml% --vb >> %current_log_file% 2>&1"
+    %command%
+    IF !errorlevel! NEQ 0 goto :error
 
+    set "command=%python%%applicfg% xmlval -xml %s_data_xml% -nxml %data_size% -nxml %scratch_sector_number% --decimal -e (((val1+1)/val2)+1) -cond val2 -c M %s_data_xml% --vb >> %current_log_file% 2>&1"
+    %command%
+    IF !errorlevel! NEQ 0 goto :error
+)
 ::xml for init image generation
 
 copy %s_code_xml% %s_code_init_xml%
@@ -309,13 +326,15 @@ IF !errorlevel! NEQ 0 goto :error
 copy %s_data_xml% %s_data_init_xml%
 IF !errorlevel! NEQ 0 goto :error
 
-set "command=%python%%applicfg% xmlparam --option add -n "Clear" -t Data -c -c -h 1 -d "" %s_code_init_xml% --vb >> %current_log_file% 2>&1"
-%command%
-IF !errorlevel! NEQ 0 goto :error
+if "%primary_only%" == "false" (
+    set "command=%python%%applicfg% xmlparam --option add -n "Clear" -t Data -c -c -h 1 -d "" %s_code_init_xml% --vb >> %current_log_file% 2>&1"
+    %command%
+    IF !errorlevel! NEQ 0 goto :error
 
-set "command=%python%%applicfg% xmlparam --option add -n "Confirm" -t Data -c --confirm -h 1 -d "" %s_code_init_xml% --vb >> %current_log_file% 2>&1"
-%command%
-IF !errorlevel! NEQ 0 goto :error
+    set "command=%python%%applicfg% xmlparam --option add -n "Confirm" -t Data -c --confirm -h 1 -d "" %s_code_init_xml% --vb >> %current_log_file% 2>&1"
+    %command%
+    IF !errorlevel! NEQ 0 goto :error
+)
 
 set "command=%python%%applicfg% xmlname -n %firmware_execution_offset%  -c x %s_code_init_xml% --vb >> %current_log_file% 2>&1"
 %command%
@@ -325,13 +344,15 @@ set "command=%python%%applicfg% xmlval --layout %preprocess_bl2_file% -m RE_IMAG
 %command%
 IF !errorlevel! NEQ 0 goto :error
 
-set "command=%python%%applicfg% xmlparam --option add -n "Clear" -t Data -c -c -h 1 -d "" %s_data_init_xml% --vb >> %current_log_file% 2>&1"
-%command%
-IF !errorlevel! NEQ 0 goto :error
+if "%primary_only%" == "false" (
+    set "command=%python%%applicfg% xmlparam --option add -n "Clear" -t Data -c -c -h 1 -d "" %s_data_init_xml% --vb >> %current_log_file% 2>&1"
+    %command%
+    IF !errorlevel! NEQ 0 goto :error
 
-set "command=%python%%applicfg% xmlparam --option add -n "Confirm" -t Data -c --confirm -h 1 -d "" %s_data_init_xml% --vb >> %current_log_file% 2>&1"
-%command%
-IF !errorlevel! NEQ 0 goto :error
+    set "command=%python%%applicfg% xmlparam --option add -n "Confirm" -t Data -c --confirm -h 1 -d "" %s_data_init_xml% --vb >> %current_log_file% 2>&1"
+    %command%
+    IF !errorlevel! NEQ 0 goto :error
+)
 
 set "command=%python%%applicfg% xmlname -n %firmware_execution_offset%  -c x %s_data_init_xml% --vb >> %current_log_file% 2>&1"
 %command%

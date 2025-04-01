@@ -9,6 +9,14 @@ set provisioningdir=%cd%
 popd
 call "%provisioningdir%\env_sonlyapp.bat"
 
+if "%~2"=="" (
+    set "primary_only=false"
+) else if "%2" NEQ "primary_only" (
+    set "primary_only=true"
+) else (
+    set "primary_only=false"
+)
+
 :: Enable delayed expansion
 setlocal EnableDelayedExpansion
 
@@ -20,6 +28,12 @@ set s_code_xml="%provisioningdir%\OEMiROT_SOnlyApp\Images\OEMiROT_S_Code_Image.x
 set s_code_init_xml="%provisioningdir%\OEMiROT_SOnlyApp\Images\OEMiROT_S_Code_Init_Image.xml"
 set s_data_xml="%provisioningdir%\OEMiROT_SOnlyApp\Images\OEMiROT_S_Data_Image.xml"
 set s_data_init_xml="%provisioningdir%\OEMiROT_SOnlyApp\Images\OEMiROT_S_Data_Init_Image.xml"
+if "%primary_only%" == "true" (
+    set s_code_xml="%provisioningdir%\OEMiROT_SOnlyApp\Images\OEMiROT_Code_Image.xml"
+    set s_code_init_xml="%provisioningdir%\OEMiROT_SOnlyApp\Images\OEMiROT_Code_Init_Image.xml"
+    set s_data_xml="%provisioningdir%\OEMiROT_SOnlyApp\Images\OEMiROT_Data_Image.xml"
+    set s_data_init_xml="%provisioningdir%\OEMiROT_SOnlyApp\Images\OEMiROT_Data_Init_Image.xml"
+)
 set s_code_bin="%projectdir%\..\Binary\rot_tz_s_app.bin"
 
 :: Variables for image xml configuration
@@ -36,7 +50,7 @@ set s_data_init_sign_hex="%provisioningdir%\OEMiROT_SOnlyApp\Binary\s_data_init_
 
 ::Variables updated by OEMiROT_Boot postbuild
 set app_image_number=1
-set image_s_size=0x2A000
+set image_s_size=0x1D8000
 
 :start
 goto exe:

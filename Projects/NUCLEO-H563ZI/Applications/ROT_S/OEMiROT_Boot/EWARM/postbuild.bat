@@ -371,7 +371,7 @@ ECHO comd : %command%
 
 :end
 
-::pause
+
 exit 0
 
 :error
@@ -380,6 +380,5 @@ echo =====
 echo ===== Error occurred.
 echo ===== See %current_log_file% for details. Then try again.
 echo =====
-::pause
 exit 1
 

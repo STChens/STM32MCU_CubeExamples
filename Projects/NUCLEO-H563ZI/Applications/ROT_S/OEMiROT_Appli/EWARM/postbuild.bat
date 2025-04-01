@@ -1,4 +1,4 @@
-::@ECHO OFF
+@ECHO OFF
 :: arg1 is the binary type (1 nonsecure, 2 secure)
 set "signing=%1"
 set "toolset=%2"
@@ -10,9 +10,9 @@ set provisioningdir=%cd%
 popd
 call "%provisioningdir%\env_sonlyapp.bat"
 
-if "%~1"=="" (
+if "%~3"=="" (
     set "primary_only=false"
-) else if "%1" NEQ "primary_only" (
+) else if "%3" NEQ "primary_only" (
     set "primary_only=true"
 ) else (
     set "primary_only=false"
