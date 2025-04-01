@@ -605,7 +605,7 @@ static void hdpext_loader_cfg(void);
 static void mpu_loader_cfg(void);
 static void sau_loader_cfg(void);
 #if defined(MCUBOOT_PRIMARY_ONLY)
-static void secure_internal_flash(uint32_t offset_start, uint32_t offset_end);
+//static void secure_internal_flash(uint32_t offset_start, uint32_t offset_end);
 #endif /* MCUBOOT_PRIMARY_ONLY */
 #endif /* MCUBOOT_EXT_LOADER */
 static void active_tamper(void);
@@ -1326,6 +1326,7 @@ static void sau_init_cfg(void)
 static void sau_loader_cfg(void)
 {
   uint32_t i = 0U;
+#if defined (USE_SYSTEM_BOOTLOADER)
   uint32_t rnr = 0U;
   uint32_t rbar = 0U;
   uint32_t rlar = 0U;
@@ -1335,6 +1336,7 @@ static void sau_loader_cfg(void)
   uint32_t ctrl_reg = 0U;
   /* Secure coding  : volatile variable usage to force compiler to reload SBS->CSLCKR register address */
   __IO uint32_t read_reg = (uint32_t) &SBS->CSLCKR;
+#endif
 
   /* configuration stage */
   if (uFlowStage == FLOW_STAGE_CFG)
@@ -1483,8 +1485,9 @@ static void sau_loader_cfg(void)
   */
 static void gtzc_loader_cfg(void)
 {
+#if defined (USE_SYSTEM_BOOTLOADER)
   uint32_t i;
-
+#endif
   /* configuration stage */
   if (uFlowStage == FLOW_STAGE_CFG)
   {

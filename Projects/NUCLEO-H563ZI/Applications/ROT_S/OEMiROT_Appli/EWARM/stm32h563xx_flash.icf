@@ -3,13 +3,13 @@
 /* IcfEditorFile="$TOOLKIT_DIR$\config\ide\IcfEditor\cortex_v1_0.xml" */
 /*-Specials-*/
 define symbol S_CODE_OFFSET = 0x00018000; /* Firmware execution area offset  */
-define symbol S_CODE_SIZE = 0x29800; /* Firmware area size ==> Max up to 174 KB (0x2B800) */
+define symbol S_CODE_SIZE = 0x1d8000; /* Firmware area size ==> Max up to 174 KB (0x2B800) */
 define exported symbol IMAGE_HEADER_SIZE = 0x400; /* mcuboot header size */
 
 define exported symbol __ICFEDIT_intvec_start__ = 0x0C000000 + S_CODE_OFFSET + IMAGE_HEADER_SIZE;
 /*-Memory Regions-*/
 define exported symbol __ICFEDIT_region_ROM_start__     = 0x0C000000 + S_CODE_OFFSET + IMAGE_HEADER_SIZE;
-define symbol __ICFEDIT_region_ROM_end__       = 0x0C000000 + S_CODE_OFFSET + S_CODE_SIZE - 1;
+define symbol __ICFEDIT_region_ROM_end__       = 0x0C000000 + S_CODE_OFFSET + S_CODE_SIZE - 0x400 - 0x2000 - 1; /*Exclue the header and trailer */
 /* Only use SRAM2/3 as full secure for our application */
 /* Because when the application jump to the bootloader, the BL uses the SRAM1 resources */
 define exported symbol __ICFEDIT_region_RAM_start__     = 0x30040000;

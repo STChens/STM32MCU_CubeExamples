@@ -666,7 +666,7 @@
             <data>
                 <extensions></extensions>
                 <cmdline></cmdline>
-                <hasPrio>160</hasPrio>
+                <hasPrio>1</hasPrio>
                 <buildSequence>inputOutputBased</buildSequence>
             </data>
         </settings>
@@ -675,7 +675,7 @@
             <archiveVersion>1</archiveVersion>
             <data>
                 <prebuild></prebuild>
-                <postbuild>cmd /C "cmd /C $PROJ_DIR$\postbuild.bat "secure" "$TOOLKIT_DIR$""</postbuild>
+                <postbuild>cmd /C "cmd /C $PROJ_DIR$\postbuild.bat "secure" "$TOOLKIT_DIR$" "primary_only""</postbuild>
             </data>
         </settings>
         <settings>
