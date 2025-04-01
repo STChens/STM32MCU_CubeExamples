@@ -1,7 +1,6 @@
 @ECHO OFF
 :: arg1 is the binary type (1 nonsecure, 2 secure)
 set "signing=%1"
-set "toolset=%2"
 
 :: Getting the Trusted Package Creator CLI path
 set "projectdir=%~dp0"
@@ -10,9 +9,9 @@ set provisioningdir=%cd%
 popd
 call "%provisioningdir%\env_sonlyapp.bat"
 
-if "%~3"=="" (
+if "%~2"=="" (
     set "primary_only=false"
-) else if "%3" NEQ "primary_only" (
+) else if "%2" NEQ "primary_only" (
     set "primary_only=true"
 ) else (
     set "primary_only=false"
@@ -105,11 +104,6 @@ if !errorlevel! neq 0 goto :error
 %python%%applicfg% xmlval -v %s_data_init_sign_hex% --string -n %fw_out_bin% %s_data_init_xml% --vb >> %current_log_file% 2>>&1
 if !errorlevel! neq 0 goto :error
 )
-
-:: TODO: Add one more step to convert enc hex file to binary file for FW update download with ext loader
-@echo %toolset% >> %current_log_file%
-%toolset%\bin\ielftool.exe --ihex --output %s_app_enc_sign_hex% %s_app_enc_sign_bin% >> %current_log_file% 2>>&1
-%toolset%\bin\ielftool.exe --ihex --output %s_data_enc_sign_hex% %s_data_enc_sign_bin% >> %current_log_file% 2>>&1
 
 exit 0
 

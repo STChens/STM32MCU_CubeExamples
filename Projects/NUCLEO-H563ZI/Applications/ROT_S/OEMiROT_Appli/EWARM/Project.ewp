@@ -675,7 +675,7 @@
             <archiveVersion>1</archiveVersion>
             <data>
                 <prebuild></prebuild>
-                <postbuild>cmd /C "cmd /C $PROJ_DIR$\postbuild.bat "secure" "$TOOLKIT_DIR$" "primary_only""</postbuild>
+                <postbuild>cmd /C "cmd /C $PROJ_DIR$\postbuild.bat "secure" "primary_only""</postbuild>
             </data>
         </settings>
         <settings>
