@@ -70,10 +70,13 @@
 #define FLASH_AREA_WRP_GROUP_SIZE       (0x8000)     /* 32 KB */
 #if defined(DEVICE_512K_FLASH_ENABLE)
 #define FLASH_B_SIZE                    (0x40000)   /* 256 KBytes*/
+#define FLASH_B_PAGE_NB					(0x20)
 #elif defined(DEVICE_1M_FLASH_ENABLE)
 #define FLASH_B_SIZE                    (0x80000)   /* 512 KBytes*/
+#define FLASH_B_PAGE_NB					(0x40)
 #else
 #define FLASH_B_SIZE                    (0x100000) /* 1 MBytes */
+#define FLASH_B_PAGE_NB					(0x80)
 #endif /* DEVICE_1M_FLASH_ENABLE */
 #define FLASH_TOTAL_SIZE                (FLASH_B_SIZE+FLASH_B_SIZE) /* 512 KBytes*/
 

@@ -175,5 +175,5 @@ enum image_attributes
   RE_FLASH_SIZE = 0x200000,
 #endif
   RE_OEMUROT_ENABLE = (0x0),
-  RE_FLASH_PAGE_NBR = (0x7F)
+  RE_FLASH_PAGE_NBR = (FLASH_B_PAGE_NB-1)
 };
