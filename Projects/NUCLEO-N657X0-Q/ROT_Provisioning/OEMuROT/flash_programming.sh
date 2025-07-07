@@ -22,8 +22,7 @@ data_ns_path=Binary/ns_data_init_enc_sign.bin
 flash_log=flash_programming.log
 
 # CubeProgrammer connection
-connect_no_reset="-c port=SWD ap=1 mode=Hotplug"
-connect_reset="-c port=SWD ap=1 mode=UR"
+connect_reset="-c port=SWD ap=1"
 
 error()
 {
@@ -49,7 +48,7 @@ echo "Reset done"
 
 action="Erase OEMuROT sectors"
 echo $action
-"$stm32programmercli" $connect_no_reset -el "$stm32ExtLoaderFlash" -e [0 $last_sector] >> "$flash_log"
+"$stm32programmercli" $connect_reset -el "$stm32ExtLoaderFlash" -e [0 $last_sector] >> "$flash_log"
 if [ $? -ne 0 ]; then
 	error
 fi
@@ -57,7 +56,7 @@ echo "OEMuROT sectors erased"
 
 action="Write OEMuROT_Boot"
 echo $action
-"$stm32programmercli" $connect_no_reset -el "$stm32ExtLoaderFlash" -d "$signedbootpath" $bootaddress -v >> "$flash_log"
+"$stm32programmercli" $connect_reset -el "$stm32ExtLoaderFlash" -d "$signedbootpath" $bootaddress -v >> "$flash_log"
 if [ $? -ne 0 ]; then
 	error
 fi
@@ -67,7 +66,7 @@ echo "Application images programming in download slots"
 
 action="Write OEMuROT_Appli Secure"
 echo $action
-"$stm32programmercli" $connect_no_reset -el "$stm32ExtLoaderFlash" -d "$appli_s_path" $appli_s_address -v >> "$flash_log"
+"$stm32programmercli" $connect_reset -el "$stm32ExtLoaderFlash" -d "$appli_s_path" $appli_s_address -v >> "$flash_log"
 if [ $? -ne 0 ]; then
 	error
 fi
@@ -76,7 +75,7 @@ echo "OEMuROT_Appli Secure Written"
 if [ "$s_data_image_number" == "0x1" ];then
 	action="Write OEMuROT Data Secure"
 	echo $action
-	"$stm32programmercli" $connect_no_reset$ -el "$stm32ExtLoaderFlash" -d "$data_s_path" $data_s_address -v >> "$flash_log"
+	"$stm32programmercli" $connect_reset -el "$stm32ExtLoaderFlash" -d "$data_s_path" $data_s_address -v >> "$flash_log"
 	if [ $? -ne 0 ]; then
 		error
 	fi
@@ -85,7 +84,7 @@ fi
 
 action="Write OEMuROT_Appli Non-Secure"
 echo $action
-"$stm32programmercli" $connect_no_reset -el "$stm32ExtLoaderFlash" -d "$appli_ns_path" $appli_ns_address -v >> "$flash_log"
+"$stm32programmercli" $connect_reset -el "$stm32ExtLoaderFlash" -d "$appli_ns_path" $appli_ns_address -v >> "$flash_log"
 if [ $? -ne 0 ]; then
   error
 fi
@@ -95,7 +94,7 @@ echo "OEMuROT_Appli Non-Secure Written"
 if [ "$ns_data_image_number" == "0x1" ]; then
     action="Write OEMuROT Data Non-Secure"
     echo $action
-    "$stm32programmercli" $connect_no_reset -el "$stm32ExtLoaderFlash" -d "$data_ns_path" $data_ns_address -v >> "$flash_log"
+    "$stm32programmercli" $connect_reset -el "$stm32ExtLoaderFlash" -d "$data_ns_path" $data_ns_address -v >> "$flash_log"
     if [ $? -ne 0 ]; then
       error
     fi
