@@ -2,7 +2,7 @@
 <project>
     <fileVersion>4</fileVersion>
     <configuration>
-        <name>STM32N6570-DK_OEMuROT_Appli_Secure</name>
+        <name>Nucleo-N657X0_OEMuROT_Appli_Secure</name>
         <toolchain>
             <name>ARM</name>
         </toolchain>
@@ -16,19 +16,19 @@
                 <debug>1</debug>
                 <option>
                     <name>BrowseInfoPath</name>
-                    <state>STM32N6570-DK_OEMuROT_Appli_Secure\BrowseInfo</state>
+                    <state>Nucleo-N657X0_OEMuROT_Appli_Secure\BrowseInfo</state>
                 </option>
                 <option>
                     <name>ExePath</name>
-                    <state>STM32N6570-DK_OEMuROT_Appli_Secure\Exe</state>
+                    <state>Nucleo-N657X0_OEMuROT_Appli_Secure\Exe</state>
                 </option>
                 <option>
                     <name>ObjPath</name>
-                    <state>STM32N6570-DK_OEMuROT_Appli_Secure\Obj</state>
+                    <state>Nucleo-N657X0_OEMuROT_Appli_Secure\Obj</state>
                 </option>
                 <option>
                     <name>ListPath</name>
-                    <state>STM32N6570-DK_OEMuROT_Appli_Secure\List</state>
+                    <state>Nucleo-N657X0_OEMuROT_Appli_Secure\List</state>
                 </option>
                 <option>
                     <name>GEndianMode</name>
@@ -201,7 +201,7 @@
                 </option>
                 <option>
                     <name>BuildFilesPath</name>
-                    <state>STM32N6570-DK_OEMuROT_Appli_Secure\</state>
+                    <state>Nucleo-N657X0_OEMuROT_Appli_Secure\</state>
                 </option>
                 <option>
                     <name>PointerAuthentication</name>

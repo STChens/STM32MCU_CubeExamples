@@ -2,7 +2,7 @@
 <project>
     <fileVersion>4</fileVersion>
     <configuration>
-        <name>STM32N6570-DK_OEMuROT_Appli_NonSecure</name>
+        <name>Nucleo-N657X0_OEMuROT_Appli_NonSecure</name>
         <toolchain>
             <name>ARM</name>
         </toolchain>
@@ -16,7 +16,7 @@
                 <debug>1</debug>
                 <option>
                     <name>BrowseInfoPath</name>
-                    <state>STM32N6570-DK_OEMuROT_Appli_NonSecure\BrowseInfo</state>
+                    <state>Nucleo-N657X0_OEMuROT_Appli_NonSecure\BrowseInfo</state>
                 </option>
                 <option>
                     <name>TrustZone</name>
@@ -24,15 +24,15 @@
                 </option>
                 <option>
                     <name>ExePath</name>
-                    <state>STM32N6570-DK_OEMuROT_Appli_NonSecure\Exe</state>
+                    <state>Nucleo-N657X0_OEMuROT_Appli_NonSecure\Exe</state>
                 </option>
                 <option>
                     <name>ObjPath</name>
-                    <state>STM32N6570-DK_OEMuROT_Appli_NonSecure\Obj</state>
+                    <state>Nucleo-N657X0_OEMuROT_Appli_NonSecure\Obj</state>
                 </option>
                 <option>
                     <name>ListPath</name>
-                    <state>STM32N6570-DK_OEMuROT_Appli_NonSecure\List</state>
+                    <state>Nucleo-N657X0_OEMuROT_Appli_NonSecure\List</state>
                 </option>
                 <option>
                     <name>GEndianMode</name>
@@ -201,7 +201,7 @@
                 </option>
                 <option>
                     <name>BuildFilesPath</name>
-                    <state>STM32N6570-DK_OEMuROT_Appli_NonSecure</state>
+                    <state>Nucleo-N657X0_OEMuROT_Appli_NonSecure</state>
                 </option>
                 <option>
                     <name>PointerAuthentication</name>
@@ -819,7 +819,7 @@
                 </option>
                 <option>
                     <name>IlinkAdditionalLibs</name>
-                    <state>$PROJ_DIR$\..\AppliSecure\STM32N6570-DK_OEMuROT_Appli_Secure\Exe\Project_import_lib.lib</state>
+                    <state>$PROJ_DIR$\..\AppliSecure\Nucleo-N657X0_OEMuROT_Appli_Secure\Exe\Project_import_lib.lib</state>
                 </option>
                 <option>
                     <name>IlinkOverrideProgramEntryLabel</name>
