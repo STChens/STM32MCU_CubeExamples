@@ -731,6 +731,167 @@ static void SystemClock_Config(void)
     Error_Handler();
   }
 }
+#if defined BOOT_TEST_MENU
+extern UART_HandleTypeDef  uart_device;
+#define BUTTON_USER1_PIN                   GPIO_PIN_13
+#define BUTTON_USER1_GPIO_PORT             GPIOC
+#define BUTTON_USER1_GPIO_CLK_ENABLE()     __HAL_RCC_GPIOC_CLK_ENABLE()
+#define BUTTON_USER1_GPIO_CLK_DISABLE()    __HAL_RCC_GPIOC_CLK_DISABLE()
+
+/**
+  * @brief  test menu
+  * @param  None
+  * @retval status
+  */
+static void test_menu(void)
+{
+  uint8_t ch = 0;
+  uint8_t target_dbghdpl;
+  int loop = 1;
+
+  /* Check user button pressing */
+  GPIO_InitTypeDef             gpio_init_structure       = {0};
+  BUTTON_USER1_GPIO_CLK_ENABLE();
+  gpio_init_structure.Pin   = BUTTON_USER1_PIN;
+  gpio_init_structure.Pull  = GPIO_PULLDOWN;
+  gpio_init_structure.Speed = GPIO_SPEED_FREQ_LOW;
+  gpio_init_structure.Mode = GPIO_MODE_INPUT;
+  HAL_GPIO_Init(BUTTON_USER1_GPIO_PORT, &gpio_init_structure);
+
+  GPIO_PinState pinstate = HAL_GPIO_ReadPin(BUTTON_USER1_GPIO_PORT, BUTTON_USER1_PIN);
+  if ( pinstate == GPIO_PIN_RESET )
+  {
+	  return;
+  }
+
+  while(loop == 1)
+  {
+	uint32_t dbgcr;
+	uint32_t apunlock;
+	uint8_t ap, dbgns, dbgs, dbghdpl;
+
+	apunlock = READ_REG(BSEC->AP_UNLOCK);
+	ap = (apunlock & BSEC_AP_UNLOCK_UNLOCK)>>BSEC_AP_UNLOCK_UNLOCK_Pos;
+	dbgcr = READ_REG(BSEC->DBGCR);
+	dbgns = (dbgcr & BSEC_DBGCR_UNLOCK)>>BSEC_DBGCR_UNLOCK_Pos;
+	dbgs = (dbgcr & BSEC_DBGCR_AUTH_SEC)>>BSEC_DBGCR_AUTH_SEC_Pos;
+	dbghdpl = (dbgcr & BSEC_DBGCR_AUTH_HDPL)>>BSEC_DBGCR_AUTH_HDPL_Pos;
+
+	printf("\r\n==================================================\r\n");
+	printf("=             Test Menu   %s: %s           =\r\n", __DATE__, __TIME__);
+	printf("==================================================\r\n");
+	printf("Show BSEC_DBGCR, BSEC_AP_UNLOCK --------------- s\r\n");
+	if ( ap == 0xB4 ) {
+	  printf("Lock AP           ----------------------------- a\r\n");
+	} else {
+	  printf("Unlock AP         ----------------------------- a\r\n");
+	}
+
+	if ( dbgns == 0xB4 && dbgs == 0xB4) {
+	  printf("Disable full debug  --------------------------- d\r\n");
+	} else {
+	  printf("Enable full debug   ----------------------------- d\r\n");
+	}
+	printf("Enable debug of HDPL0 ------------------------- 0\r\n");
+	printf("Enable debug of HDPL1 ------------------------- 1\r\n");
+	printf("Enable debug of HDPL2 ------------------------- 2\r\n");
+	printf("Enable debug of HDPL3 ------------------------- 3\r\n");
+	printf("Show current HDPL ----------------------------- h\r\n");
+	printf("Increment HDPL    ----------------------------- i\r\n");
+	printf("Exit    ----------------------------------------x\r\n");
+	printf("==================================================\r\n");
+
+	while( HAL_UART_Receive (&uart_device, (uint8_t *) &ch, 1, HAL_MAX_DELAY) != HAL_OK){};
+
+	switch(ch)
+	{
+	case 'x':
+		loop = 0; // exit from menu
+	    break;
+	case 'i':
+	  printf("Increment HDP level\r\n");
+	  WRITE_REG(BSEC->HDPLCR, 0x60B166E7);
+	  // fault through
+	case 'h':
+	  {
+		uint8_t current_hdpl = (READ_REG(BSEC->HDPLSR) & 0xFF);
+		printf("Current HDP Level: %02x [%s]\r\n", current_hdpl, \
+						(current_hdpl == 0xB4) ? "HDPL0": \
+						((current_hdpl == 0x51) ? "HDPL1": \
+						  ((current_hdpl == 0x8A) ? "HDPL2": \
+							((current_hdpl == 0x6F) ? "HDPL3": "invalid"))));
+	  }
+	  break;
+	case 's':
+	  printf("AP UNLOCK state   : %02x [%s]\r\n", ap, (ap == 0xB4) ? "Unlocked": "Locked");
+	  printf("Debug unlock state: %02x [%s]\r\n", dbgns, (dbgns == 0xB4) ? "Enabled": "Disabled" );
+	  printf("Secure Debug auth state: %02x [%s]\r\n", dbgs, (dbgs == 0xB4) ? "Enabled": "Disabled");
+	  printf("Debug allowed HDP Level: %02x [%s]\r\n", dbghdpl, \
+							  (dbghdpl == 0xB4) ? "HDPL0": \
+							  ((dbghdpl == 0x51) ? "HDPL1": \
+								((dbghdpl == 0x8A) ? "HDPL2": \
+								  ((dbghdpl == 0x6F) ? "HDPL3": "invalid"))));
+	  break;
+	case 'a':
+	  if ( ap == 0xB4 ) {
+		ap = 0;
+		printf("Lock AP\r\n");
+	  } else {
+		ap = 0xB4;
+		printf("Unlock AP\r\n");
+	  }
+	  apunlock = apunlock & (~BSEC_AP_UNLOCK_UNLOCK_Msk) | ((uint32_t)ap << BSEC_AP_UNLOCK_UNLOCK_Pos);
+	  WRITE_REG(BSEC->AP_UNLOCK, apunlock);
+	  apunlock = READ_REG(BSEC->AP_UNLOCK);
+	  ap = (apunlock & BSEC_AP_UNLOCK_UNLOCK)>>BSEC_AP_UNLOCK_UNLOCK_Pos;
+	  printf("AP UNLOCK State   : %02x [%s]\r\n", ap, (ap == 0xB4) ? "Enabled": "Disabled");
+	  break;
+	case 'd':
+	  if ( dbgns == 0xB4 && dbgs == 0xB4 ) {
+		dbgns = 0;
+		dbgs = 0;
+		printf("Disable debug\r\n");
+	  } else {
+		dbgns = 0xB4;
+		dbgs = 0xB4;
+		printf("Enable full debug\r\n");
+	  }
+	  dbgcr = dbgcr & (~BSEC_DBGCR_UNLOCK_Msk) \
+					& (~BSEC_DBGCR_AUTH_SEC_Msk) \
+					& (~BSEC_DBGCR_AUTH_HDPL_Msk) \
+					| ((uint32_t)dbgns << BSEC_DBGCR_UNLOCK_Pos) \
+					| ((uint32_t)dbgs << BSEC_DBGCR_AUTH_SEC_Pos) \
+					| ((uint32_t)target_dbghdpl << BSEC_DBGCR_AUTH_HDPL_Pos)  ;
+	  printf("BSEC DBGCR new value to be set: %08x\r\n", dbgcr);
+	  WRITE_REG(BSEC->DBGCR, dbgcr);
+	  dbgcr = READ_REG(BSEC->DBGCR);
+	  dbgns = (dbgcr & BSEC_DBGCR_UNLOCK)>>BSEC_DBGCR_UNLOCK_Pos;
+	  dbgs = (dbgcr & BSEC_DBGCR_AUTH_SEC)>>BSEC_DBGCR_AUTH_SEC_Pos;
+	  printf("Debug unlock state: %02x [%s]\r\n", dbgns, (dbgns == 0xB4) ? "Enabled": "Disabled" );
+	  printf("Secure Debug auth state: %02x [%s]\r\n", dbgs, (dbgs == 0xB4) ? "Enabled": "Disabled");
+	  break;
+	case '0':
+	  target_dbghdpl = 0xB4;
+	  printf("Target HDPL for debug enable: %02x\r\n", target_dbghdpl);
+	  break;
+	case '1':
+	  target_dbghdpl = 0x51;
+	  printf("Target HDPL for debug enable: %02x\r\n", target_dbghdpl);
+	  break;
+	case '2':
+	  target_dbghdpl = 0x8A;
+	  printf("Target HDPL for debug enable: %02x\r\n", target_dbghdpl);
+	  break;
+	case '3':
+	  target_dbghdpl = 0x6F;
+	  printf("Target HDPL for debug enable: %02x\r\n", target_dbghdpl);
+	  break;
+	default:
+	  break;
+	}
+  }
+}
+#endif
 
 /**
   * @brief  Platform init
@@ -778,6 +939,11 @@ int32_t boot_platform_init(void)
 
   /* Authorize NS debugging when requested */
   debug_authentication();
+
+#if defined BOOT_TEST_MENU
+  /* run test menu first */
+  test_menu();
+#endif
 
   if (EXT_FLASH_DEV_NAME.Initialize(NULL) != ARM_DRIVER_OK)
   {

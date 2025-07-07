@@ -83,7 +83,11 @@ static ARM_USART_CAPABILITIES USART_GetCapabilities(void)
 #define COM_RX_PIN                             GPIO_PIN_6
 #define COM_RX_AF                              GPIO_AF7_USART1
 
+#if defined BOOT_TEST_MENU
+UART_HandleTypeDef  uart_device;
+#else
 static UART_HandleTypeDef  uart_device;
+#endif
 static int32_t USART0_Initialize(ARM_USART_SignalEvent_t cb_event)
 {
 
