@@ -146,7 +146,7 @@ int main(void)
   COM_Init();
 
 #ifdef PRINT_BOOT_TIME
-  printf("\r\nBoot time : %u ms at %u MHz", (unsigned int)(time), (unsigned int)(SystemCoreClock/1000000U));
+  printf("\r\nBoot time : %u ms at %u MHz", (unsigned int)(time/1000), (unsigned int)(SystemCoreClock/1000000U));
   printf("\r\n");
 #endif
   printf("\r\n======================================================================");

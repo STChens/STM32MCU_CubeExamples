@@ -792,7 +792,6 @@ static void test_menu(void)
 	} else {
 	  printf("Enable full debug   ----------------------------- d\r\n");
 	}
-	printf("Enable debug of HDPL0 ------------------------- 0\r\n");
 	printf("Enable debug of HDPL1 ------------------------- 1\r\n");
 	printf("Enable debug of HDPL2 ------------------------- 2\r\n");
 	printf("Enable debug of HDPL3 ------------------------- 3\r\n");
@@ -869,10 +868,6 @@ static void test_menu(void)
 	  dbgs = (dbgcr & BSEC_DBGCR_AUTH_SEC)>>BSEC_DBGCR_AUTH_SEC_Pos;
 	  printf("Debug unlock state: %02x [%s]\r\n", dbgns, (dbgns == 0xB4) ? "Enabled": "Disabled" );
 	  printf("Secure Debug auth state: %02x [%s]\r\n", dbgs, (dbgs == 0xB4) ? "Enabled": "Disabled");
-	  break;
-	case '0':
-	  target_dbghdpl = 0xB4;
-	  printf("Target HDPL for debug enable: %02x\r\n", target_dbghdpl);
 	  break;
 	case '1':
 	  target_dbghdpl = 0x51;
