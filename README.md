@@ -31,10 +31,10 @@ Details about the content of this release are available in the release note [her
 
 Please refer to the [CONTRIBUTING.md](CONTRIBUTING.md) guide.
 
+# Note for this branch
 ## OEM-iROT for Nucleo-H7S3L8 board
+This branch provides oem-irot examples for Nucleo-H7S3L8
+The example is made basing on STM32H7RS CubeFW package v1.1.0
 OEMiROT_BOOT and OEMiROT_Appli folders includes the OEMiROT example for Nucleo-H7S3L8 board. 
 The projects are modified basing on the OEMiROT example for STM32H7S8-DK board.
 
-# STM32H7S Examples
-This branch provides oem-irot examples for Nucleo-H7S3L8
-The example is made basing on STM32H7RS CubeFW package v1.1.0
