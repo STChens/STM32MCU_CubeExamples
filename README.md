@@ -1,3 +1,11 @@
+# Note for this branch
+## OEM-iROT for Nucleo-H7S3L8 board
+This branch provides oem-irot examples for Nucleo-H7S3L8
+The example is made basing on STM32H7RS CubeFW package v1.1.0
+OEMiROT_BOOT and OEMiROT_Appli folders includes the OEMiROT example for Nucleo-H7S3L8 board. 
+The projects are modified basing on the OEMiROT example for STM32H7S8-DK board.
+To use the files from this branch, you need to get the base package of STM32H7RS CubeFW from st.com
+
 # STM32CubeH7RS MCU Firmware Package
 
 ![latest tag](https://img.shields.io/github/v/tag/STMicroelectronics/STM32CubeHR7S.svg?color=brightgreen)
@@ -30,11 +38,3 @@ Details about the content of this release are available in the release note [her
 ## Troubleshooting
 
 Please refer to the [CONTRIBUTING.md](CONTRIBUTING.md) guide.
-
-# Note for this branch
-## OEM-iROT for Nucleo-H7S3L8 board
-This branch provides oem-irot examples for Nucleo-H7S3L8
-The example is made basing on STM32H7RS CubeFW package v1.1.0
-OEMiROT_BOOT and OEMiROT_Appli folders includes the OEMiROT example for Nucleo-H7S3L8 board. 
-The projects are modified basing on the OEMiROT example for STM32H7S8-DK board.
-
