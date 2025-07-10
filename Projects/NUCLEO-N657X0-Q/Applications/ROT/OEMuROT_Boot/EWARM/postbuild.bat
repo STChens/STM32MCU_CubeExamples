@@ -50,6 +50,7 @@ set enck=%bootrom_path%\Keys\OEM_SECRET.bin
 set version=0x00000001
 
 set scmd=-pubk "%pbk1%" "%pbk2%" "%pbk3%" "%pbk4%" "%pbk5%" "%pbk6%" "%pbk7%" "%pbk8%" -prvk "%pvk%" -pwd rot1
+
 if "%crypted%" == "1" (
 set enccmd=-encdc %derivval% -enck "%enck%"
 set optionflag=-t fsbl -iv %version% -la 0x34180000 -of 0x80000003
@@ -57,6 +58,8 @@ set optionflag=-t fsbl -iv %version% -la 0x34180000 -of 0x80000003
 set enccmd=
 set optionflag=-t fsbl -iv %version% -la 0x34180000 -of 0x80000001
 )
+::set scmd=-nk
+::set optionflag=-t fsbl -iv %version% -of 0x0
 
 :: Variable for AppliCfg
 set preprocess_bl2_file=%projectdir%image_macros_preprocessed_bl2.c

@@ -21,6 +21,8 @@
 #include "low_level_ext_flash.h"
 #include "appli_flash_layout.h"
 
+#include "stm32n6xx_hal.h"
+
 /** @addtogroup STM32N6xx_HAL_Template
   * @{
   */
@@ -43,6 +45,37 @@ extern ARM_DRIVER_FLASH Driver_EXT_FLASH0;
 /* Global variables ----------------------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
+
+/**
+  * @brief   This function opens the s and/or ns debug for the current HDPL.
+  * @param  None
+  * @retval None
+  */
+void open_full_debug(int ns_only) {
+  uint32_t dbgcr; 
+  uint32_t apunlock; 
+  uint8_t current_hdpl;
+  
+  /* get current HDPL */
+  current_hdpl = (READ_REG(BSEC->HDPLSR) & 0xFF);
+  
+  /* unlock AP */
+  apunlock = READ_REG(BSEC->AP_UNLOCK); 
+  apunlock = apunlock & (~BSEC_AP_UNLOCK_UNLOCK_Msk) | (0xB4 << BSEC_AP_UNLOCK_UNLOCK_Pos); 
+  WRITE_REG(BSEC->AP_UNLOCK, apunlock); 
+  
+  /* enabled debug */
+  dbgcr = READ_REG(BSEC->DBGCR);
+  dbgcr = dbgcr & (~BSEC_DBGCR_UNLOCK_Msk) \
+                & (~BSEC_DBGCR_AUTH_SEC_Msk) \
+                & (~BSEC_DBGCR_AUTH_HDPL_Msk) \
+                | ((uint32_t)0xB4 << BSEC_DBGCR_UNLOCK_Pos) \
+                  | ((uint32_t)((ns_only == 1)? 0 : 0xB4) << BSEC_DBGCR_AUTH_SEC_Pos) \
+                | ((uint32_t)current_hdpl << BSEC_DBGCR_AUTH_HDPL_Pos);  
+  WRITE_REG(BSEC->DBGCR, dbgcr);  
+  __ISB();
+  __DSB();
+}
 
 /**
   * @brief  Main program
@@ -96,7 +129,7 @@ int main(void)
 
   /* Set USART1 as configurable by non-secure */
   HAL_RIF_RISC_SetSlaveSecureAttributes(RIF_RISC_PERIPH_INDEX_USART1, RIF_ATTRIBUTE_NSEC);
-
+  
 #if (DOWNLOAD_MENU == 1)
   Driver_EXT_FLASH0.Initialize(NULL);
 #endif /* DOWNLOAD_MENU == 1 */

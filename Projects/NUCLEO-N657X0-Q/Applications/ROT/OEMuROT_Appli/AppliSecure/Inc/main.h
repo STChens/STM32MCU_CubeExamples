@@ -56,6 +56,6 @@ typedef void CMSE_NS_CALL (*funcptr)(void);
 #endif
 
 /* Exported variables ------------------------------------------------------- */
-
+void open_full_debug(int ns_only);
 /******************************************************************************/
 #endif /* MAIN_H */

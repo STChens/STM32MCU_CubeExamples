@@ -43,6 +43,23 @@ void *pSecureError_Callback = NULL;   /* Pointer to secure error callback in Non
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
+CMSE_NS_ENTRY void SECURE_OpenDebug(uint32_t *apunlock, uint32_t *dbgcr, uint8_t *hdpl)
+{
+  open_full_debug(1);
+  if ( apunlock != NULL )
+  {
+    *apunlock = READ_REG(BSEC->AP_UNLOCK);
+  }
+  if ( dbgcr != NULL )
+  {
+    *dbgcr = READ_REG(BSEC->DBGCR);
+  }
+  if ( *hdpl != NULL )
+  {
+    *hdpl = (uint8_t)(READ_REG(BSEC->HDPLSR) & 0xFF);
+  }
+}
+
 /**
   * @brief  Secure registration of non-secure callback.
   * @param  CallbackId  callback identifier

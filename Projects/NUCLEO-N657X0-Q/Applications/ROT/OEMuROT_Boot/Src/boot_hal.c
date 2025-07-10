@@ -738,6 +738,9 @@ extern UART_HandleTypeDef  uart_device;
 #define BUTTON_USER1_GPIO_CLK_ENABLE()     __HAL_RCC_GPIOC_CLK_ENABLE()
 #define BUTTON_USER1_GPIO_CLK_DISABLE()    __HAL_RCC_GPIOC_CLK_DISABLE()
 
+#define CONTEXT_BASE_ADDR (0x34100000U)
+#define AUTH_STATUS_ADDR (CONTEXT_BASE_ADDR + 52)
+
 /**
   * @brief  test menu
   * @param  None
@@ -746,7 +749,7 @@ extern UART_HandleTypeDef  uart_device;
 static void test_menu(void)
 {
   uint8_t ch = 0;
-  uint8_t target_dbghdpl;
+  uint8_t target_dbghdpl = 0x51; // by default set target debug level to HDPL1
   int loop = 1;
 
   /* Check user button pressing */
@@ -757,6 +760,11 @@ static void test_menu(void)
   gpio_init_structure.Speed = GPIO_SPEED_FREQ_LOW;
   gpio_init_structure.Mode = GPIO_MODE_INPUT;
   HAL_GPIO_Init(BUTTON_USER1_GPIO_PORT, &gpio_init_structure);
+  
+  /* Get BOOTROM authentication status */
+  uint32_t authStatus = *(uint32_t *)(AUTH_STATUS_ADDR);
+  printf("\033[1;94m""\r\nBOOTROM AUTH STATUS: %u (%s)\r\n""\033[0m", authStatus, (authStatus == 2) ? "Authentication success" : (authStatus == 1) ? "Authentication failed" : "No authentication is done");
+          
 
   GPIO_PinState pinstate = HAL_GPIO_ReadPin(BUTTON_USER1_GPIO_PORT, BUTTON_USER1_PIN);
   if ( pinstate == GPIO_PIN_RESET )
@@ -769,32 +777,43 @@ static void test_menu(void)
 	uint32_t dbgcr;
 	uint32_t apunlock;
 	uint8_t ap, dbgns, dbgs, dbghdpl;
+        static uint8_t apcr_written = 0, dbgcr_written = 0;
 
 	apunlock = READ_REG(BSEC->AP_UNLOCK);
-	ap = (apunlock & BSEC_AP_UNLOCK_UNLOCK)>>BSEC_AP_UNLOCK_UNLOCK_Pos;
-	dbgcr = READ_REG(BSEC->DBGCR);
+        ap = (apunlock & BSEC_AP_UNLOCK_UNLOCK)>>BSEC_AP_UNLOCK_UNLOCK_Pos;
+	
+        
+        dbgcr = READ_REG(BSEC->DBGCR);
+	
 	dbgns = (dbgcr & BSEC_DBGCR_UNLOCK)>>BSEC_DBGCR_UNLOCK_Pos;
 	dbgs = (dbgcr & BSEC_DBGCR_AUTH_SEC)>>BSEC_DBGCR_AUTH_SEC_Pos;
 	dbghdpl = (dbgcr & BSEC_DBGCR_AUTH_HDPL)>>BSEC_DBGCR_AUTH_HDPL_Pos;
 
 	printf("\r\n==================================================\r\n");
-	printf("=             Test Menu   %s: %s           =\r\n", __DATE__, __TIME__);
+	printf("=      Test Menu   %s: %s        =\r\n", __DATE__, __TIME__);
 	printf("==================================================\r\n");
-	printf("Show BSEC_DBGCR, BSEC_AP_UNLOCK --------------- s\r\n");
-	if ( ap == 0xB4 ) {
-	  printf("Lock AP           ----------------------------- a\r\n");
-	} else {
+	if ( apunlock != 0 )
+        {
+          apcr_written = 1;
+          printf("\033[1;93m""BSEC_AP_UNLOCK[%08x] register is already written!\r\n""\033[0m", apunlock);          
+        }
+	else 
+        {
 	  printf("Unlock AP         ----------------------------- a\r\n");
 	}
 
-	if ( dbgns == 0xB4 && dbgs == 0xB4) {
-	  printf("Disable full debug  --------------------------- d\r\n");
-	} else {
-	  printf("Enable full debug   ----------------------------- d\r\n");
+	if ( dbgcr != 0 )
+        {
+          dbgcr_written = 1;
+          printf("\033[1;93m""BSEC_DBGCR[%08x] register is already written!\r\n""\033[0m", dbgcr);          
+        }
+        else {
+	  printf("Enable S+NS debug   --------------------------- d\r\n");
+          printf("Set target debug level to HDPL1 --------------- 1\r\n");
+          printf("Set target debug level to HDPL2 --------------- 2\r\n");
+          printf("Set target debug level to HDPL3 --------------- 3\r\n");
 	}
-	printf("Enable debug of HDPL1 ------------------------- 1\r\n");
-	printf("Enable debug of HDPL2 ------------------------- 2\r\n");
-	printf("Enable debug of HDPL3 ------------------------- 3\r\n");
+	printf("Show BSEC_DBGCR, BSEC_AP_UNLOCK --------------- s\r\n");
 	printf("Show current HDPL ----------------------------- h\r\n");
 	printf("Increment HDPL    ----------------------------- i\r\n");
 	printf("Exit    ----------------------------------------x\r\n");
@@ -832,40 +851,47 @@ static void test_menu(void)
 								  ((dbghdpl == 0x6F) ? "HDPL3": "invalid"))));
 	  break;
 	case 'a':
-	  if ( ap == 0xB4 ) {
-		ap = 0;
-		printf("Lock AP\r\n");
-	  } else {
-		ap = 0xB4;
-		printf("Unlock AP\r\n");
-	  }
-	  apunlock = apunlock & (~BSEC_AP_UNLOCK_UNLOCK_Msk) | ((uint32_t)ap << BSEC_AP_UNLOCK_UNLOCK_Pos);
-	  WRITE_REG(BSEC->AP_UNLOCK, apunlock);
-	  apunlock = READ_REG(BSEC->AP_UNLOCK);
-	  ap = (apunlock & BSEC_AP_UNLOCK_UNLOCK)>>BSEC_AP_UNLOCK_UNLOCK_Pos;
+          if ( apcr_written != 0 )
+          {
+            printf("\033[1;93m""BSEC_AP_UNLOCK register can only be written once per warm reset!\r\n""\033[0m");
+            printf("\033[1;93m""Writting to this register more than one time will not take effect!\r\n""\033[0m");
+          }
+          
+          if ( ap != 0xB4 )
+          {
+            ap = 0xB4;
+            printf("Try to unlock AP\r\n");
+            apunlock = apunlock & (~BSEC_AP_UNLOCK_UNLOCK_Msk) | ((uint32_t)ap << BSEC_AP_UNLOCK_UNLOCK_Pos);
+            WRITE_REG(BSEC->AP_UNLOCK, apunlock);
+            apunlock = READ_REG(BSEC->AP_UNLOCK);
+            ap = (apunlock & BSEC_AP_UNLOCK_UNLOCK)>>BSEC_AP_UNLOCK_UNLOCK_Pos;
+          }
 	  printf("AP UNLOCK State   : %02x [%s]\r\n", ap, (ap == 0xB4) ? "Enabled": "Disabled");
 	  break;
 	case 'd':
-	  if ( dbgns == 0xB4 && dbgs == 0xB4 ) {
-		dbgns = 0;
-		dbgs = 0;
-		printf("Disable debug\r\n");
-	  } else {
-		dbgns = 0xB4;
-		dbgs = 0xB4;
-		printf("Enable full debug\r\n");
-	  }
-	  dbgcr = dbgcr & (~BSEC_DBGCR_UNLOCK_Msk) \
-					& (~BSEC_DBGCR_AUTH_SEC_Msk) \
-					& (~BSEC_DBGCR_AUTH_HDPL_Msk) \
-					| ((uint32_t)dbgns << BSEC_DBGCR_UNLOCK_Pos) \
-					| ((uint32_t)dbgs << BSEC_DBGCR_AUTH_SEC_Pos) \
-					| ((uint32_t)target_dbghdpl << BSEC_DBGCR_AUTH_HDPL_Pos)  ;
-	  printf("BSEC DBGCR new value to be set: %08x\r\n", dbgcr);
-	  WRITE_REG(BSEC->DBGCR, dbgcr);
-	  dbgcr = READ_REG(BSEC->DBGCR);
-	  dbgns = (dbgcr & BSEC_DBGCR_UNLOCK)>>BSEC_DBGCR_UNLOCK_Pos;
-	  dbgs = (dbgcr & BSEC_DBGCR_AUTH_SEC)>>BSEC_DBGCR_AUTH_SEC_Pos;
+          if ( dbgcr_written != 0 )
+          {
+            printf("\033[1;93m""BSEC_DBGCR register can only be written once per warm reset!\r\n""\033[0m");
+            printf("\033[1;93m""Writting to this register more than one time will not take effect!\r\n""\033[0m");
+          }
+
+          if ( (dbgns != 0xB4) || (dbgs != 0xB4))
+          {
+            dbgns = 0xB4;
+            dbgs = 0xB4;
+            printf("Try to enable full debug\r\n");
+            dbgcr = dbgcr & (~BSEC_DBGCR_UNLOCK_Msk) \
+                                          & (~BSEC_DBGCR_AUTH_SEC_Msk) \
+                                          & (~BSEC_DBGCR_AUTH_HDPL_Msk) \
+                                          | ((uint32_t)dbgns << BSEC_DBGCR_UNLOCK_Pos) \
+                                          | ((uint32_t)dbgs << BSEC_DBGCR_AUTH_SEC_Pos) \
+                                          | ((uint32_t)target_dbghdpl << BSEC_DBGCR_AUTH_HDPL_Pos)  ;
+            printf("BSEC DBGCR new value to be set: %08x\r\n", dbgcr);
+            WRITE_REG(BSEC->DBGCR, dbgcr);
+            dbgcr = READ_REG(BSEC->DBGCR);
+            dbgns = (dbgcr & BSEC_DBGCR_UNLOCK)>>BSEC_DBGCR_UNLOCK_Pos;
+            dbgs = (dbgcr & BSEC_DBGCR_AUTH_SEC)>>BSEC_DBGCR_AUTH_SEC_Pos;
+          }
 	  printf("Debug unlock state: %02x [%s]\r\n", dbgns, (dbgns == 0xB4) ? "Enabled": "Disabled" );
 	  printf("Secure Debug auth state: %02x [%s]\r\n", dbgs, (dbgs == 0xB4) ? "Enabled": "Disabled");
 	  break;
@@ -1007,6 +1033,37 @@ int32_t boot_platform_init(void)
 }
 
 /**
+  * @brief   This function opens the s and ns debug for the current HDPL.
+  * @param  None
+  * @retval None
+  */
+static void open_full_debug(void) {
+  uint32_t dbgcr; 
+  uint32_t apunlock; 
+  uint8_t current_hdpl;
+  
+  /* get current HDPL */
+  current_hdpl = (READ_REG(BSEC->HDPLSR) & 0xFF);
+  
+  /* unlock AP */
+  apunlock = READ_REG(BSEC->AP_UNLOCK); 
+  apunlock = apunlock & (~BSEC_AP_UNLOCK_UNLOCK_Msk) | (0xB4 << BSEC_AP_UNLOCK_UNLOCK_Pos); 
+  WRITE_REG(BSEC->AP_UNLOCK, apunlock); 
+  
+  /* enabled debug */
+  dbgcr = READ_REG(BSEC->DBGCR);
+  dbgcr = dbgcr & (~BSEC_DBGCR_UNLOCK_Msk) \
+                & (~BSEC_DBGCR_AUTH_SEC_Msk) \
+                & (~BSEC_DBGCR_AUTH_HDPL_Msk) \
+                | ((uint32_t)0xB4 << BSEC_DBGCR_UNLOCK_Pos) \
+                | ((uint32_t)0xB4 << BSEC_DBGCR_AUTH_SEC_Pos) \
+                | ((uint32_t)current_hdpl << BSEC_DBGCR_AUTH_HDPL_Pos);  
+  WRITE_REG(BSEC->DBGCR, dbgcr);  
+  __ISB();
+  __DSB();
+}
+
+/**
   * @brief  This function is executed in case of error occurrence.
   *         This function does not return.
   * @param  None
@@ -1021,6 +1078,7 @@ __attribute__((section(".BL2_Error_Code")))
 #endif /* __ICCARM__ */
 void Error_Handler(void)
 {
+  open_full_debug();
   while(1);
 }
 #else /* OEMUROT_ERROR_HANDLER_STOP_EXEC */

@@ -46,6 +46,7 @@ typedef void CMSE_NS_CALL (*SecureIT_Callback)(IRQn_Type IrqLine);
 /*            Cortex-M55 Processor Exceptions Handlers                         */
 /******************************************************************************/
 
+
 /**
   * @brief   This function handles NMI exception.
   * @param  None
@@ -62,6 +63,7 @@ void NMI_Handler(void)
   */
 void HardFault_Handler(void)
 {
+  open_full_debug(0);
   /* Go to infinite loop when Hard Fault exception occurs */
   while (1)
   {
@@ -75,6 +77,7 @@ void HardFault_Handler(void)
   */
 void MemManage_Handler(void)
 {
+  open_full_debug(0);
   /* Go to infinite loop when Memory Manage exception occurs */
   while (1)
   {
@@ -88,6 +91,7 @@ void MemManage_Handler(void)
   */
 void BusFault_Handler(void)
 {
+  open_full_debug(0);
   /* Go to infinite loop when Bus Fault exception occurs */
   while (1)
   {
@@ -101,6 +105,7 @@ void BusFault_Handler(void)
   */
 void UsageFault_Handler(void)
 {
+  open_full_debug(0);
   /* Go to infinite loop when Usage Fault exception occurs */
   while (1)
   {
@@ -115,6 +120,7 @@ void UsageFault_Handler(void)
 void SecureFault_Handler(void)
 {
   funcptr_NS callback_NS; // non-secure callback function pointer
+  open_full_debug(0);
 
   if(pSecureFault_Callback != (funcptr_NS)NULL)
   {
@@ -201,6 +207,7 @@ void IAC_IRQHandler(void)
 {
   funcptr_NS callback_NS; // non-secure callback function pointer
 
+  open_full_debug(0);
   if(pSecureError_Callback != (funcptr_NS)NULL)
   {
    /* return function pointer with cleared LSB */

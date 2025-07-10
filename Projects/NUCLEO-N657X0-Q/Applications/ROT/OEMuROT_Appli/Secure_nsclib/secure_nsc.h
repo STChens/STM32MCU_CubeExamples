@@ -40,5 +40,6 @@ void SECURE_RegisterCallback(SECURE_CallbackIDTypeDef CallbackId, void *func);
 void SECURE_GetInfo(ARM_FLASH_INFO* data);
 int32_t SECURE_EraseSector(uint32_t addr);
 int32_t SECURE_ProgramData(uint32_t addr, const void *data, uint32_t cnt);
+void SECURE_OpenDebug(uint32_t *apunlock, uint32_t *dbgcr, uint8_t *hdpl);
 
 #endif /* SECURE_NSC_H */
