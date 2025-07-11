@@ -169,6 +169,7 @@ void FW_APP_PrintMainMenu(void)
 {
   printf("\r\n=================== Main Menu ============================\r\n\n");
   printf("  Enable non-secure debug ------------------------------- d\r\n\n");
+  printf("  Get debug enable state  ------------------------------- s\r\n\n");
 #if (NS_DATA_IMAGE_NUMBER == 1)
   printf("  Non-Secure Data --------------------------------------- 1\r\n\n");
 #endif /* NS_DATA_IMAGE_NUMBER == 1 */
@@ -200,34 +201,32 @@ void FW_APP_Run(void)
     {
       switch (key)
       {
-        case 'd' : 
+        case 'd' :
           printf("  Call NSC API to enable debug for Non-secure part \r\n\n");
+          SECURE_EnableNSDebug();
+          break;
+
+        case 's' :
+          printf("  Call NSC API to get debug state \r\n\n");
           {
-            uint32_t dbgcr;
             uint32_t apunlock;            
-            uint8_t ap, dbgns, dbgs, dbghdpl;
-            uint8_t current_hdpl;
+            BSEC_DebugCfgTypeDef dbgCfg;
+            uint32_t current_hdpl;
             
-            SECURE_OpenDebug(&apunlock, &dbgcr, &current_hdpl);
-            
-            ap = (apunlock & BSEC_AP_UNLOCK_UNLOCK)>>BSEC_AP_UNLOCK_UNLOCK_Pos;
-            dbgns = (dbgcr & BSEC_DBGCR_UNLOCK)>>BSEC_DBGCR_UNLOCK_Pos;
-            dbgs = (dbgcr & BSEC_DBGCR_AUTH_SEC)>>BSEC_DBGCR_AUTH_SEC_Pos;
-            dbghdpl = (dbgcr & BSEC_DBGCR_AUTH_HDPL)>>BSEC_DBGCR_AUTH_HDPL_Pos;
-            
-            printf("\tCurrent HDP Level: %02x [%s]\r\n", current_hdpl, \
+            SECURE_GetDebugState(&apunlock, &dbgCfg, &current_hdpl);
+            printf("\tCurrent HDP Level: %08x [%s]\r\n", current_hdpl, \
                                             (current_hdpl == 0xB4) ? "HDPL0": \
                                             ((current_hdpl == 0x51) ? "HDPL1": \
                                               ((current_hdpl == 0x8A) ? "HDPL2": \
                                                     ((current_hdpl == 0x6F) ? "HDPL3": "invalid"))));            
-            printf("\tAP UNLOCK state   : %02x [%s]\r\n", ap, (ap == 0xB4) ? "Unlocked": "Locked");
-            printf("\tDebug unlock state: %02x [%s]\r\n", dbgns, (dbgns == 0xB4) ? "Enabled": "Disabled" );
-            printf("\tSecure Debug auth state: %02x [%s]\r\n", dbgs, (dbgs == 0xB4) ? "Enabled": "Disabled");
-            printf("\tDebug allowed HDP Level: %02x [%s]\r\n", dbghdpl, \
-							  (dbghdpl == 0xB4) ? "HDPL0": \
-							  ((dbghdpl == 0x51) ? "HDPL1": \
-								((dbghdpl == 0x8A) ? "HDPL2": \
-								  ((dbghdpl == 0x6F) ? "HDPL3": "invalid"))));
+            printf("\tAP UNLOCK state   : %08x [%s]\r\n", apunlock, (apunlock == HAL_BSEC_DEBUG_UNLOCKED) ? "Unlocked": "Locked");
+            printf("\tDebug unlock state: %08x [%s]\r\n", dbgCfg.NonSec_Dbg_Auth, (dbgCfg.NonSec_Dbg_Auth == HAL_BSEC_NONSEC_DBG_AUTH) ? "Enabled": "Disabled" );
+            printf("\tSecure Debug auth state: %08x [%s]\r\n", dbgCfg.Sec_Dbg_Auth, (dbgCfg.Sec_Dbg_Auth == HAL_BSEC_SEC_DBG_AUTH) ? "Enabled": "Disabled");
+            printf("\tDebug allowed HDP Level: %08x [%s]\r\n", dbgCfg.HDPL_Open_Dbg, \
+							  (dbgCfg.HDPL_Open_Dbg == HAL_BSEC_OPEN_DBG_LEVEL_0) ? "HDPL0": \
+							  ((dbgCfg.HDPL_Open_Dbg == HAL_BSEC_OPEN_DBG_LEVEL_1) ? "HDPL1": \
+								((dbgCfg.HDPL_Open_Dbg == HAL_BSEC_OPEN_DBG_LEVEL_2) ? "HDPL2": \
+								  ((dbgCfg.HDPL_Open_Dbg == HAL_BSEC_OPEN_DBG_LEVEL_3) ? "HDPL3": "invalid"))));
           }
           break;        
 #if (NS_DATA_IMAGE_NUMBER == 1)

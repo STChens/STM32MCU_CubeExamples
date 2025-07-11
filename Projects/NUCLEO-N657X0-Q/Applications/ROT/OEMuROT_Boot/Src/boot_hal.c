@@ -738,9 +738,6 @@ extern UART_HandleTypeDef  uart_device;
 #define BUTTON_USER1_GPIO_CLK_ENABLE()     __HAL_RCC_GPIOC_CLK_ENABLE()
 #define BUTTON_USER1_GPIO_CLK_DISABLE()    __HAL_RCC_GPIOC_CLK_DISABLE()
 
-#define CONTEXT_BASE_ADDR (0x34100000U)
-#define AUTH_STATUS_ADDR (CONTEXT_BASE_ADDR + 52)
-
 /**
   * @brief  test menu
   * @param  None
@@ -761,11 +758,6 @@ static void test_menu(void)
   gpio_init_structure.Mode = GPIO_MODE_INPUT;
   HAL_GPIO_Init(BUTTON_USER1_GPIO_PORT, &gpio_init_structure);
   
-  /* Get BOOTROM authentication status */
-  uint32_t authStatus = *(uint32_t *)(AUTH_STATUS_ADDR);
-  printf("\033[1;94m""\r\nBOOTROM AUTH STATUS: %u (%s)\r\n""\033[0m", authStatus, (authStatus == 2) ? "Authentication success" : (authStatus == 1) ? "Authentication failed" : "No authentication is done");
-          
-
   GPIO_PinState pinstate = HAL_GPIO_ReadPin(BUTTON_USER1_GPIO_PORT, BUTTON_USER1_PIN);
   if ( pinstate == GPIO_PIN_RESET )
   {
@@ -795,7 +787,7 @@ static void test_menu(void)
 	if ( apunlock != 0 )
         {
           apcr_written = 1;
-          printf("\033[1;93m""BSEC_AP_UNLOCK[%08x] register is already written!\r\n""\033[0m", apunlock);          
+          printf("\033[1;93m""BSEC_AP_UNLOCK[%08x] register is already written!\033[0m\r\n", apunlock);
         }
 	else 
         {
@@ -805,7 +797,7 @@ static void test_menu(void)
 	if ( dbgcr != 0 )
         {
           dbgcr_written = 1;
-          printf("\033[1;93m""BSEC_DBGCR[%08x] register is already written!\r\n""\033[0m", dbgcr);          
+          printf("\033[1;93m""BSEC_DBGCR[%08x] register is already written!\033[0m\r\n", dbgcr);
         }
         else {
 	  printf("Enable S+NS debug   --------------------------- d\r\n");
@@ -853,8 +845,8 @@ static void test_menu(void)
 	case 'a':
           if ( apcr_written != 0 )
           {
-            printf("\033[1;93m""BSEC_AP_UNLOCK register can only be written once per warm reset!\r\n""\033[0m");
-            printf("\033[1;93m""Writting to this register more than one time will not take effect!\r\n""\033[0m");
+            printf("\033[1;93m""BSEC_AP_UNLOCK register can only be written once per warm reset!\033[0m\r\n");
+            printf("\033[1;93m""Writting to this register more than one time will not take effect!\033[0m\r\n");
           }
           
           if ( ap != 0xB4 )
@@ -871,8 +863,8 @@ static void test_menu(void)
 	case 'd':
           if ( dbgcr_written != 0 )
           {
-            printf("\033[1;93m""BSEC_DBGCR register can only be written once per warm reset!\r\n""\033[0m");
-            printf("\033[1;93m""Writting to this register more than one time will not take effect!\r\n""\033[0m");
+            printf("\033[1;93m""BSEC_DBGCR register can only be written once per warm reset!\033[0m\r\n");
+            printf("\033[1;93m""Writting to this register more than one time will not take effect!\033[0m\r\n");
           }
 
           if ( (dbgns != 0xB4) || (dbgs != 0xB4))
@@ -1032,6 +1024,7 @@ int32_t boot_platform_init(void)
   return 0;
 }
 
+#if defined BOOT_TEST_MENU
 /**
   * @brief   This function opens the s and ns debug for the current HDPL.
   * @param  None
@@ -1062,6 +1055,7 @@ static void open_full_debug(void) {
   __ISB();
   __DSB();
 }
+#endif /* #if defined BOOT_TEST_MENU */
 
 /**
   * @brief  This function is executed in case of error occurrence.
@@ -1078,7 +1072,9 @@ __attribute__((section(".BL2_Error_Code")))
 #endif /* __ICCARM__ */
 void Error_Handler(void)
 {
+#if defined BOOT_TEST_MENU
   open_full_debug();
+#endif /* #if defined BOOT_TEST_MENU */
   while(1);
 }
 #else /* OEMUROT_ERROR_HANDLER_STOP_EXEC */

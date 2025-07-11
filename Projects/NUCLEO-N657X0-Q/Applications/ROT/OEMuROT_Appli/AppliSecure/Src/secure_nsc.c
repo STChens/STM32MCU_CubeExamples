@@ -43,20 +43,26 @@ void *pSecureError_Callback = NULL;   /* Pointer to secure error callback in Non
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
-CMSE_NS_ENTRY void SECURE_OpenDebug(uint32_t *apunlock, uint32_t *dbgcr, uint8_t *hdpl)
+CMSE_NS_ENTRY void SECURE_EnableNSDebug(void)
 {
   open_full_debug(1);
+}
+
+CMSE_NS_ENTRY void SECURE_GetDebugState(uint32_t *apunlock, BSEC_DebugCfgTypeDef *pDbgCfg, uint32_t *hdpl)
+{
+  BSEC_HandleTypeDef sBsecHandler = {.Instance = BSEC};
+
   if ( apunlock != NULL )
   {
-    *apunlock = READ_REG(BSEC->AP_UNLOCK);
+	HAL_BSEC_GetDebugLockState(&sBsecHandler, apunlock);
   }
-  if ( dbgcr != NULL )
+  if ( pDbgCfg != NULL )
   {
-    *dbgcr = READ_REG(BSEC->DBGCR);
+	  HAL_BSEC_GetDebugConfig(&sBsecHandler, pDbgCfg);
   }
-  if ( *hdpl != NULL )
+  if ( hdpl != NULL )
   {
-    *hdpl = (uint8_t)(READ_REG(BSEC->HDPLSR) & 0xFF);
+    HAL_BSEC_GetHDPLValue(&sBsecHandler, hdpl);
   }
 }
 

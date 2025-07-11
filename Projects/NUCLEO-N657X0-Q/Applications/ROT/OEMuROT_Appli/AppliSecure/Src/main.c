@@ -52,29 +52,18 @@ extern ARM_DRIVER_FLASH Driver_EXT_FLASH0;
   * @retval None
   */
 void open_full_debug(int ns_only) {
-  uint32_t dbgcr; 
-  uint32_t apunlock; 
-  uint8_t current_hdpl;
+  BSEC_HandleTypeDef sBsecHandler = {.Instance = BSEC};
+  uint32_t hdpl;
+  BSEC_DebugCfgTypeDef dbgCfg = {0};
   
-  /* get current HDPL */
-  current_hdpl = (READ_REG(BSEC->HDPLSR) & 0xFF);
+  HAL_BSEC_UnlockDebug(&sBsecHandler);
+
+  HAL_BSEC_GetHDPLValue(&sBsecHandler, &hdpl);
   
-  /* unlock AP */
-  apunlock = READ_REG(BSEC->AP_UNLOCK); 
-  apunlock = apunlock & (~BSEC_AP_UNLOCK_UNLOCK_Msk) | (0xB4 << BSEC_AP_UNLOCK_UNLOCK_Pos); 
-  WRITE_REG(BSEC->AP_UNLOCK, apunlock); 
-  
-  /* enabled debug */
-  dbgcr = READ_REG(BSEC->DBGCR);
-  dbgcr = dbgcr & (~BSEC_DBGCR_UNLOCK_Msk) \
-                & (~BSEC_DBGCR_AUTH_SEC_Msk) \
-                & (~BSEC_DBGCR_AUTH_HDPL_Msk) \
-                | ((uint32_t)0xB4 << BSEC_DBGCR_UNLOCK_Pos) \
-                  | ((uint32_t)((ns_only == 1)? 0 : 0xB4) << BSEC_DBGCR_AUTH_SEC_Pos) \
-                | ((uint32_t)current_hdpl << BSEC_DBGCR_AUTH_HDPL_Pos);  
-  WRITE_REG(BSEC->DBGCR, dbgcr);  
-  __ISB();
-  __DSB();
+  dbgCfg.HDPL_Open_Dbg = hdpl << 16;
+  dbgCfg.Sec_Dbg_Auth = ns_only == 1 ? HAL_BSEC_SEC_DBG_UNAUTH : HAL_BSEC_SEC_DBG_AUTH;
+  dbgCfg.NonSec_Dbg_Auth = HAL_BSEC_NONSEC_DBG_AUTH;
+  HAL_BSEC_ConfigDebug(&sBsecHandler, &dbgCfg);
 }
 
 /**

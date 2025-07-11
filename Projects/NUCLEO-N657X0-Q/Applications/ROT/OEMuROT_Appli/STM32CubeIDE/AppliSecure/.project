@@ -34,6 +34,36 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>Application/User/low_level_device.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/AppliSecure/Src/low_level_device.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/low_level_ext_flash.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/AppliSecure/Src/low_level_ext_flash.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/main.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/AppliSecure/Src/main.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/secure_nsc.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/AppliSecure/Src/secure_nsc.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/stm32n6xx_hal_msp.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/AppliSecure/Src/stm32n6xx_hal_msp.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/stm32n6xx_it.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/AppliSecure/Src/stm32n6xx_it.c</locationURI>
+		</link>
+		<link>
 			<name>Drivers/CMSIS/system_stm32n6xx_s.c</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/AppliSecure/Src/system_stm32n6xx_s.c</locationURI>
@@ -42,6 +72,11 @@
 			<name>Drivers/STM32N6xx_HAL_Driver/stm32n6xx_hal.c</name>
 			<type>1</type>
 			<locationURI>PARENT-7-PROJECT_LOC/Drivers/STM32N6xx_HAL_Driver/Src/stm32n6xx_hal.c</locationURI>
+		</link>
+		<link>
+			<name>Drivers/STM32N6xx_HAL_Driver/stm32n6xx_hal_bsec.c</name>
+			<type>1</type>
+			<locationURI>PARENT-7-PROJECT_LOC/Drivers/STM32N6xx_HAL_Driver/Src/stm32n6xx_hal_bsec.c</locationURI>
 		</link>
 		<link>
 			<name>Drivers/STM32N6xx_HAL_Driver/stm32n6xx_hal_cortex.c</name>
@@ -89,34 +124,9 @@
 			<locationURI>PARENT-7-PROJECT_LOC/Drivers/STM32N6xx_HAL_Driver/Src/stm32n6xx_hal_xspi.c</locationURI>
 		</link>
 		<link>
-			<name>Application/User/low_level_device.c</name>
+			<name>Middlewares/STM32_ExtMem_Manager/stm32_extmem.c</name>
 			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/AppliSecure/Src/low_level_device.c</locationURI>
-		</link>
-		<link>
-			<name>Application/User/low_level_ext_flash.c</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/AppliSecure/Src/low_level_ext_flash.c</locationURI>
-		</link>
-		<link>
-			<name>Application/User/main.c</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/AppliSecure/Src/main.c</locationURI>
-		</link>
-		<link>
-			<name>Application/User/secure_nsc.c</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/AppliSecure/Src/secure_nsc.c</locationURI>
-		</link>
-		<link>
-			<name>Application/User/stm32n6xx_hal_msp.c</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/AppliSecure/Src/stm32n6xx_hal_msp.c</locationURI>
-		</link>
-		<link>
-			<name>Application/User/stm32n6xx_it.c</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/AppliSecure/Src/stm32n6xx_it.c</locationURI>
+			<locationURI>PARENT-7-PROJECT_LOC/Middlewares/ST/STM32_ExtMem_Manager/stm32_extmem.c</locationURI>
 		</link>
 		<link>
 			<name>Middlewares/STM32_ExtMem_Manager/SAL/stm32_sal_xspi.c</name>
@@ -132,11 +142,6 @@
 			<name>Middlewares/STM32_ExtMem_Manager/SFDP/stm32_sfdp_driver.c</name>
 			<type>1</type>
 			<locationURI>PARENT-7-PROJECT_LOC/Middlewares/ST/STM32_ExtMem_Manager/nor_sfdp/stm32_sfdp_driver.c</locationURI>
-		</link>
-		<link>
-			<name>Middlewares/STM32_ExtMem_Manager/stm32_extmem.c</name>
-			<type>1</type>
-			<locationURI>PARENT-7-PROJECT_LOC/Middlewares/ST/STM32_ExtMem_Manager/stm32_extmem.c</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
