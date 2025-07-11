@@ -58,8 +58,6 @@ set optionflag=-t fsbl -iv %version% -la 0x34180000 -of 0x80000003
 set enccmd=
 set optionflag=-t fsbl -iv %version% -la 0x34180000 -of 0x80000001
 )
-::set scmd=-nk
-::set optionflag=-t fsbl -iv %version% -of 0x0
 
 :: Variable for AppliCfg
 set preprocess_bl2_file=%projectdir%image_macros_preprocessed_bl2.c
