@@ -48,8 +48,8 @@ extern "C" {
 #endif
 
 /* Usage of COM feature */
-#define USE_BSP_COM_FEATURE 0U
-#define USE_COM_LOG         0U
+#define USE_BSP_COM_FEATURE 1U
+#define USE_COM_LOG         1U
 
 /* Button user interrupt priority */
 #define BSP_BUTTON_USER_IT_PRIORITY 15UL

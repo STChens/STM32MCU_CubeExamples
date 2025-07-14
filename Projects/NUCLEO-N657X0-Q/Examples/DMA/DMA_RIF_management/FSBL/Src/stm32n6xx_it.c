@@ -230,21 +230,29 @@ void HPDMA1_Channel12_IRQHandler(void)
   /* USER CODE BEGIN HPDMA1_Channel12_IRQn 0 */
   uint32_t temp;
   
-  /* Save current perceived CID */
-  temp = HAL_SYSCFG_GetPerceivedPrivCID();
+  // restore the CID only if static CID mode is used
+  if ((HPDMA1_Channel12->CCIDCFGR & 0x2) == 0)
+  {
+    /* Save current perceived CID */
+    temp = HAL_SYSCFG_GetPerceivedPrivCID();
 
-  /* Set perceived to 4 (i.e. DMA channel CID) so that the DMA registers can  */
-  /* be read and cleared */ 
-  HAL_SYSCFG_SetPerceivedPrivCID(4U);
+    /* Set perceived to 4 (i.e. DMA channel CID) so that the DMA registers can  */
+    /* be read and cleared */ 
+    HAL_SYSCFG_SetPerceivedPrivCID(4U);
+  }
   /* USER CODE END HPDMA1_Channel12_IRQn 0 */
 
   /* Restore perceived CID */
   HAL_DMA_IRQHandler(&handle_HPDMA1_Channel12);
 
   /* USER CODE BEGIN HPDMA1_Channel12_IRQn 1 */
-
-  /* Restore initial value */
-  HAL_SYSCFG_SetPerceivedPrivCID(temp);
+  
+  // restore the CID only if static CID mode is used
+  if ((HPDMA1_Channel12->CCIDCFGR & 0x2) == 0)
+  {  
+    /* Restore initial value */
+    HAL_SYSCFG_SetPerceivedPrivCID(temp);
+  }
   /* USER CODE END HPDMA1_Channel12_IRQn 1 */
 }
 /* USER CODE END 1 */
