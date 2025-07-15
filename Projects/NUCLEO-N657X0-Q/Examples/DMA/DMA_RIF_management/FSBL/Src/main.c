@@ -125,10 +125,10 @@ static void print_test_menu(void)
   printf("====================================================================\r\n");
   printf("case1: HPDMA static CID 4, SYSCFG SECCID 4, RISAF2 CID 4 ---------- 1\r\n");
   printf("case2: HPDMA static CID 4, SYSCFG SECCID 5, RISAF2 CID 4 ---------- 2\r\n");
-  printf("case2: HPDMA static CID 4, SYSCFG SECCID 4, RISAF2 CID 5 ---------- 3\r\n");
-  printf("case3: HPDMA semaphore CID (4|5), SYSCFG SECCID 4, RISAF2 CID 4 --- 4\r\n");
-  printf("case3: HPDMA semaphore CID (4|5), SYSCFG SECCID 5, RISAF2 CID 4 --- 5\r\n");
-  printf("case3: HPDMA semaphore CID (4|5), SYSCFG SECCID 6, RISAF2 CID 4 --- 6\r\n");
+  printf("case3: HPDMA static CID 4, SYSCFG SECCID 4, RISAF2 CID 5 ---------- 3\r\n");
+  printf("case4: HPDMA semaphore CID (4|5), SYSCFG SECCID 4, RISAF2 CID 4 --- 4\r\n");
+  printf("case5: HPDMA semaphore CID (4|5), SYSCFG SECCID 5, RISAF2 CID 4 --- 5\r\n");
+  printf("case6: HPDMA semaphore CID (4|5), SYSCFG SECCID 6, RISAF2 CID 4 --- 6\r\n");
   printf("====================================================================\r\n");
   printf("Your input:\r\n");  
 }
@@ -385,10 +385,16 @@ static void HPDMA_TestCase_Static_CID(uint32_t syscfg_dmacid, uint32_t risaf2_ci
         Error_Handler();
       }
       
+      printf("\033[1;95m""\r\nIAC event (Peripheral: AXISRAM1) detected.\r\n");      
+      printf("Access Type: Write\r\n");
+      printf("Access Address: %08x\r\n", illegal_access.Data.Address);
+      printf("Access CID: 4\r\n");
+      printf("Access Secure: SECURE\r\n");
+      printf("Access PRIV: Unprivileged\033[0m\r\n");
+      
       /* test case ended as expected      */
       BSP_LED_On(LED_RED);
       BSP_LED_On(LED_GREEN);
-      printf("\033[1;95m""\r\nIAC event (Peripheral: AXISRAM1) detected.\033[0m\r\n");      
       printf("\033[1;92m""Test result: OK.\033[0m\r\n");
   }
   
@@ -416,7 +422,7 @@ static void HPDMA_TestCase_Sem_CID(uint32_t syscfg_dmacid)
   }
   else if ( syscfg_dmacid == 5 )
   {
-    printf("Expected result: IAC event will be detected (Peripheral: AXISRAM1)\r\n");    
+    printf("Expected result: IAC event will be detected (Peripheral: AXISRAM1 & AXISRAM2)\r\n");    
   }
   else 
   {
@@ -630,10 +636,49 @@ static void HPDMA_TestCase_Sem_CID(uint32_t syscfg_dmacid)
         Error_Handler();
       }
       
+      printf("\033[1;95m""\r\nIAC event (Peripheral: AXISRAM1) detected.\r\n");      
+      printf("Access Type: Write\r\n");
+      printf("Access Address: %08x\r\n", illegal_access.Data.Address);
+      printf("Access CID: 5\r\n");
+      printf("Access Secure: SECURE\r\n");
+      printf("Access PRIV: Unprivileged\033[0m\r\n");
+      
+      /* Was SRAM2 illegal detected */      
+      /* IAC illegal checking       */
+      if(HAL_RIF_IAC_GetFlag(RIF_RCC_PERIPH_INDEX_AXISRAM2) == 0U)
+      {
+        Error_Handler();
+      }     
+
+      /* RISAL illegal checking     */
+      HAL_RIF_RISAF_GetIllegalAccess(RISAF3, &illegal_access);
+
+     /* Primary region filtering applies: there should not be an illegal access */
+      if (illegal_access.ErrorType != RISAF_ILLEGAL_ACCESS)
+      {
+        Error_Handler();
+      }
+
+      /* Illegal access seen at aSRC_Buffer */
+      if (illegal_access.Data.AccessType != RIF_ACCTYPE_READ_FETCH ||
+          illegal_access.Data.Address    != 0x341c0000 ||  /* aSRC_Buffer */
+          illegal_access.Data.CID        != RIF_CID_5 ||
+          illegal_access.Data.SecPriv    != (RIF_ATTRIBUTE_SEC |
+                                             RIF_ATTRIBUTE_NPRIV))
+      {
+        Error_Handler();
+      }
+      
+      printf("\033[1;95m""\r\nIAC event (Peripheral: AXISRAM2) detected.\r\n");      
+      printf("Access Type: READ/FETCH\r\n");
+      printf("Access Address: %08x\r\n", illegal_access.Data.Address);
+      printf("Access CID: 5\r\n");
+      printf("Access Secure: SECURE\r\n");
+      printf("Access PRIV: Unprivileged\033[0m\r\n");
+      
       /* test case ended as expected      */
       BSP_LED_On(LED_RED);
       BSP_LED_On(LED_GREEN);
-      printf("\033[1;95m""\r\nIAC event (Peripheral: AXISRAM1) detected.\033[0m\r\n");      
       printf("\033[1;92m""Test result: OK.\033[0m\r\n");
   }
   else 
@@ -736,10 +781,9 @@ int main(void)
   int loop = 1;
   char ch = 0;
     
-  print_test_menu();  
-    
   while(loop)
   {    
+    print_test_menu();  
     while( HAL_UART_Receive (&hcom_uart[COM1], (uint8_t *) &ch, 1, HAL_MAX_DELAY) != HAL_OK){};
 
     printf("%c\r\n",ch);
@@ -765,12 +809,12 @@ int main(void)
         break;  
       case 'x':
               loop = 0; // exit from menu
+              printf("Exit from test menu!\r\n");
         break;
       default: 
         printf("Invalid value!\r\n");
         break;
-    }
-    print_test_menu();    
+    }    
   }
   
     
