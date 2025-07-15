@@ -661,7 +661,7 @@ static void HPDMA_TestCase_Sem_CID(uint32_t syscfg_dmacid)
 
       /* Illegal access seen at aSRC_Buffer */
       if (illegal_access.Data.AccessType != RIF_ACCTYPE_READ_FETCH ||
-          illegal_access.Data.Address    != 0x341c0000 ||  /* aSRC_Buffer */
+          illegal_access.Data.Address    != (uint32_t)&aSRC_Buffer[0] ||  /* aSRC_Buffer */
           illegal_access.Data.CID        != RIF_CID_5 ||
           illegal_access.Data.SecPriv    != (RIF_ATTRIBUTE_SEC |
                                              RIF_ATTRIBUTE_NPRIV))
