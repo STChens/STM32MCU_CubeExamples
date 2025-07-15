@@ -46,9 +46,6 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-static int case1 = 1; /* OK case: SRAM CID = Perceive CID = DMA_CID              */
-static int case2 = 0; /* KO case: SRAM CID = DMA_CID (Perceive CID is different) */
-static int case3 = 1; /* KO case: Perceive CID = DMA_CID (SRAM CID is different) */
 extern UART_HandleTypeDef  hcom_uart[];
 
 static uint32_t protected_address_start = 0x0;
@@ -89,7 +86,7 @@ void SystemClock_Config(void);
 static __INLINE  void __SVC(void);
 
 void MPU_Config(void);
-void RISAF_Config(void);
+void RISAF_Config_RISAF3(void);
 void RISAF_Config_RISAF2(uint32_t cid_whitelist);
 
 static void HPDMA1_Init(void);
@@ -123,15 +120,16 @@ static __INLINE void __SVC()
 /* USER CODE END 0 */
 static void print_test_menu(void)
 {
-  printf("\r\n==================================================\r\n");
-  printf("=      Test Menu   %s: %s        =\r\n", __DATE__, __TIME__);
-  printf("==================================================\r\n");
-  printf("case1: HPDMA static CID 4 RISAF2 CID 4 ---------- 1\r\n");
-  printf("case2: HPDMA static CID 5 RISAF2 CID 4 ---------- 2\r\n");
-  printf("case2: HPDMA static CID 4 RISAF2 CID 5 ---------- 3\r\n");
-  printf("case3: HPDMA semaphore CID 4 RISAF2 CID 4 ------- 4\r\n");
-  printf("case3: HPDMA semaphore CID 5 RISAF2 CID 4 ------- 5\r\n");
-  printf("==================================================\r\n");
+  printf("\r\n====================================================================\r\n");
+  printf("=                Test Menu   %s: %s                =\r\n", __DATE__, __TIME__);
+  printf("====================================================================\r\n");
+  printf("case1: HPDMA static CID 4, SYSCFG SECCID 4, RISAF2 CID 4 ---------- 1\r\n");
+  printf("case2: HPDMA static CID 4, SYSCFG SECCID 5, RISAF2 CID 4 ---------- 2\r\n");
+  printf("case2: HPDMA static CID 4, SYSCFG SECCID 4, RISAF2 CID 5 ---------- 3\r\n");
+  printf("case3: HPDMA semaphore CID (4|5), SYSCFG SECCID 4, RISAF2 CID 4 --- 4\r\n");
+  printf("case3: HPDMA semaphore CID (4|5), SYSCFG SECCID 5, RISAF2 CID 4 --- 5\r\n");
+  printf("case3: HPDMA semaphore CID (4|5), SYSCFG SECCID 6, RISAF2 CID 4 --- 6\r\n");
+  printf("====================================================================\r\n");
   printf("Your input:\r\n");  
 }
 
@@ -139,39 +137,44 @@ static void print_test_menu(void)
   * @brief  HPDMA RIF test case static cid.
   * @retval none
   */
-static void HPDMA_TestCase_Static_CID(uint32_t hpdma_cid, uint32_t risaf2_cid)
+static void HPDMA_TestCase_Static_CID(uint32_t syscfg_dmacid, uint32_t risaf2_cid)
 {
-  printf("\r\nHPDMA RIF Test case (cid static mode) with CID = %d, RISAF2 CID = %d\r\n", hpdma_cid, risaf2_cid);
-  if ( hpdma_cid != 4 && hpdma_cid != 5 )
+  if ( syscfg_dmacid != 4 && syscfg_dmacid != 5 )
   {
     printf("\033[1;91m""For this test, hpdma cid shall be either 4 or 5!\033[0m\r\n");
     return;
   }
-  if ( risaf2_cid != RIF_CID_4 && risaf2_cid != RIF_CID_5 )
+  if ( risaf2_cid != 4 && risaf2_cid != 5 )
   {
     printf("\033[1;91m""For this test, risaf2 cid shall be either 4 or 5!\033[0m\r\n");
     return;
   }  
 
+  printf("\r\nHPDMA RIF Test case \r\n");
+  printf("\t=> HPDMA1 Channel 12 cid static mode = 4\r\n");
+  printf("\t=> SYSCFG DMACID = %d\r\n", syscfg_dmacid);
+  printf("\t=> AXI SRAM2 RW CID = 4|5\r\n");
+  printf("\t=> AXI SRAM1 RW CID = %d\r\n", risaf2_cid);  
+  
   BSP_LED_Off(LED_RED);
   BSP_LED_Off(LED_BLUE);
   BSP_LED_Off(LED_GREEN);
   
-  if ( hpdma_cid == 4 && risaf2_cid == RIF_CID_4 )
+  if ( syscfg_dmacid == 4 && risaf2_cid == 4 )
   {
     printf("Expected result: DMA transfer completed normally\r\n");
   }
-  else if ( hpdma_cid == 4 && risaf2_cid == RIF_CID_5 )
+  else if ( syscfg_dmacid == 4 && risaf2_cid == 5 )
   {
     printf("Expected result: IAC event will be detected (Peripheral: AXISRAM1)\r\n");    
   }
-  else if ( hpdma_cid == 5 && risaf2_cid == RIF_CID_4 )
+  else if ( syscfg_dmacid == 5 && risaf2_cid == 4 )
   {
     printf("Expected result: IAC event will be detected (Peripheral: HPDMA1)\r\n");
   }
   
   /* Configure RISAF2 CID whitelist as CID 4 */
-  RISAF_Config_RISAF2(risaf2_cid);  
+  RISAF_Config_RISAF2(1<<(risaf2_cid));
   
   /* Initialize all configured peripherals */
   /* USER CODE BEGIN 2 */
@@ -180,18 +183,22 @@ static void HPDMA_TestCase_Static_CID(uint32_t hpdma_cid, uint32_t risaf2_cid)
   /* - Source and destination: secure/secure */
   /* - CID 4 selected and isolation filtering enable */
   HPDMA1_Init();
-
+  
+  /* Clear IAC event */
+  HAL_RIF_IAC_ClearFlag(RIF_AWARE_PERIPH_INDEX_HPDMA1);
+  HAL_RIF_IAC_ClearFlag(RIF_RCC_PERIPH_INDEX_AXISRAM1);  
+  
   /* Perceive CID set to 4 or 5 */
   /* From now on all AHB secure user accesses which arrive at the HPDMA, appear to carry the CID 4 */
   /* (AHB secure user accesses = access of DMA control registers) */
-  HAL_SYSCFG_SetPerceivedCID(hpdma_cid);
+  HAL_SYSCFG_SetPerceivedCID(syscfg_dmacid);
 
-  if (HAL_SYSCFG_GetPerceivedCID()  != hpdma_cid)
+  if (HAL_SYSCFG_GetPerceivedCID()  != syscfg_dmacid)
   {
     /* Perceived CID not set */
     Error_Handler();
   }
-
+  
   /* Switch from privileged to unprivileged */
   __set_CONTROL(0x1);
   __ISB();
@@ -216,9 +223,11 @@ static void HPDMA_TestCase_Static_CID(uint32_t hpdma_cid, uint32_t risaf2_cid)
     /* Transfer Error */
     Error_Handler();
   }  
-
-  if ( hpdma_cid == 4 && risaf2_cid == RIF_CID_4)
+  
+  if ( syscfg_dmacid == 4 && risaf2_cid == 4)
   {
+    /* Case 1: DMA transfer shall complete normally */
+    
       /* Wait for transfer completion */
       HAL_Delay(2);
 
@@ -297,13 +306,14 @@ static void HPDMA_TestCase_Static_CID(uint32_t hpdma_cid, uint32_t risaf2_cid)
       }
         
       /* End of test */
-      HPDMA1_DeInit();
       BSP_LED_On(LED_GREEN);  
       printf("\033[1;93m""DMA transfer completeed.\033[0m\r\n");
       printf("\033[1;92m""Test result: OK.\033[0m\r\n");
-  }
-  else if ( risaf2_cid == RIF_CID_4 && hpdma_cid == 5)
+  } 
+  else if ( risaf2_cid == 4 && syscfg_dmacid == 5)
   {
+    /* Case 2: IAC event happens because HPDMA Channel 12 (CID4) register is accessed by CPU (CID5) */
+    
       /* IAC HPDMA error expected */
 
       /* Switch back from unprivileged to privileged -------------------*/
@@ -323,17 +333,17 @@ static void HPDMA_TestCase_Static_CID(uint32_t hpdma_cid, uint32_t risaf2_cid)
       {
         Error_Handler();
       }
-
-      /* End of test */
-      HPDMA1_DeInit();
+      
       /* test case ended as expected      */
       BSP_LED_On(LED_RED);
       BSP_LED_On(LED_GREEN);
       printf("\033[1;91m""\r\nIAC event (Peripheral: HPDMA1) detected.\033[0m\r\n");
       printf("\033[1;92m""Test result: OK.\033[0m\r\n");
   }
-  else if ( risaf2_cid == RIF_CID_5 && hpdma_cid == 4)
+  else if ( risaf2_cid == 5 && syscfg_dmacid == 4)
   {
+    /* Case 3: IAC event happens because SRAM1 (CID5) is accessed by HPDMA Channel 12 (CID4) */
+    
       /* IAC SRAM1 error expected */
 
       /* Switch back from unprivileged to privileged -------------------*/
@@ -353,7 +363,7 @@ static void HPDMA_TestCase_Static_CID(uint32_t hpdma_cid, uint32_t risaf2_cid)
       if(HAL_RIF_IAC_GetFlag(RIF_RCC_PERIPH_INDEX_AXISRAM1) == 0U)
       {
         Error_Handler();
-      }
+      }     
 
       /* RISAL illegal checking     */
       RISAF_IllegalAccess_t illegal_access;
@@ -374,33 +384,39 @@ static void HPDMA_TestCase_Static_CID(uint32_t hpdma_cid, uint32_t risaf2_cid)
       {
         Error_Handler();
       }
-
-      /* End of test       */
+      
       /* test case ended as expected      */
       BSP_LED_On(LED_RED);
       BSP_LED_On(LED_GREEN);
-      printf("\033[1;91m""\r\nIAC event (Peripheral: AXISRAM1) detected.\033[0m\r\n");      
+      printf("\033[1;95m""\r\nIAC event (Peripheral: AXISRAM1) detected.\033[0m\r\n");      
       printf("\033[1;92m""Test result: OK.\033[0m\r\n");
   }
+  
+  /* End of test       */
+  HAL_SYSCFG_SetPerceivedCID(1);
+  HAL_SYSCFG_SetPerceivedPrivCID(1);
+  HPDMA1_DeInit();  
 }
 
 /**
   * @brief  HPDMA RIF test case semaphore mode cid with whitelist.
   * @retval none
   */
-static void HPDMA_TestCase_Sem_CID(uint32_t cid)
-{
-  printf("\r\nHPDMA RIF Test case (cid semaphore mode with whitelist), with cid = %d\r\n", cid);
+static void HPDMA_TestCase_Sem_CID(uint32_t syscfg_dmacid)
+{  
+  printf("\r\nHPDMA RIF Test case \r\n");
+  printf("\t=> HPDMA1 Channel 12 cid semaphore mode with whitelist = 4|5\r\n");
+  printf("\t=> SYSCFG DMACID = %d\r\n", syscfg_dmacid);
+  printf("\t=> AXI SRAM2 RW CID = 4|5\r\n");
+  printf("\t=> AXI SRAM1 RW CID = 4\r\n");
   
-  if ( cid != 4 && cid != 5 )
-  {
-    printf("\033[1;91m""For this test, cid shall be either 4 or 5!\033[0m\r\n");
-    return;
-  }
-
-  if ( cid == 4 )
+  if ( syscfg_dmacid == 4 )
   {
     printf("Expected result: DMA transfer completed normally\r\n");
+  }
+  else if ( syscfg_dmacid == 5 )
+  {
+    printf("Expected result: IAC event will be detected (Peripheral: AXISRAM1)\r\n");    
   }
   else 
   {
@@ -423,28 +439,33 @@ static void HPDMA_TestCase_Sem_CID(uint32_t cid)
   /* - CID 4 selected and isolation filtering enable */
   HPDMA1_Init();
   
-  /* Enable semephore mode, semaphore white list: CID 4, CID5, CID 1 */
-  HPDMA1_Channel12->CCIDCFGR = 0x00320003;
+  /* Enable semephore mode, semaphore white list: CID 4, CID5 */
+  HPDMA1_Channel12->CCIDCFGR = 0x00300003;
   __ISB();
   __DSB();
 
   /* Perceive CID set to cid (4 or 5) */
   /* From now on all AHB secure user accesses which arrive at the HPDMA, appear to carry the CID 4 */
   /* (AHB secure user accesses = access of DMA control registers) */
-  HAL_SYSCFG_SetPerceivedCID(cid);
+  HAL_SYSCFG_SetPerceivedCID(syscfg_dmacid);
 
-  if (HAL_SYSCFG_GetPerceivedCID()  != cid)
+  if (HAL_SYSCFG_GetPerceivedCID()  != syscfg_dmacid)
   {
     /* Perceived CID not set */
     Error_Handler();
   }
   
-  HAL_SYSCFG_SetPerceivedPrivCID(cid);
-  if (HAL_SYSCFG_GetPerceivedPrivCID()  != cid)
+  /* configure DMA CID for both SEC and SEC+PRIV mode */
+  HAL_SYSCFG_SetPerceivedPrivCID(syscfg_dmacid);
+  if (HAL_SYSCFG_GetPerceivedPrivCID()  != syscfg_dmacid)
   {
     /* Perceived CID not set */
     Error_Handler();
   }
+  
+  /* Clear IAC event */
+  HAL_RIF_IAC_ClearFlag(RIF_AWARE_PERIPH_INDEX_HPDMA1);
+  HAL_RIF_IAC_ClearFlag(RIF_RCC_PERIPH_INDEX_AXISRAM1); 
   
   /* Switch from privileged to unprivileged */
   __set_CONTROL(0x1);
@@ -475,40 +496,11 @@ static void HPDMA_TestCase_Sem_CID(uint32_t cid)
     /* Transfer Error */
     Error_Handler();
   }
-
-
-  if ( cid != 4 )
+  
+  if ( syscfg_dmacid == 4 )
   {
-    /* IAC SRAM1 error expected */
-
-    /* Switch back from unprivileged to privileged -------------------*/
-    /* Generate a system call exception, and in the ISR switch back Thread mode
-      to privileged */
-    __SVC();
-
-    /* Check if privileged */
-    if((__get_CONTROL() & 1U) != 0U)
-    {
-      /* unprivileged detected */
-      Error_Handler();
-    }
-
-    /* Was HPDMA1 illegal detected */
-    if(HAL_RIF_IAC_GetFlag(RIF_AWARE_PERIPH_INDEX_HPDMA1) == 0U)
-    {
-      Error_Handler();
-    }
-
-    /* End of test - cid != 4       */
-    HPDMA1_DeInit();
-    /* test case ended as expected      */
-    BSP_LED_On(LED_RED);
-    BSP_LED_On(LED_GREEN);
-    printf("\033[1;91m""\r\nIAC event (HPDMA1) detected.\033[0m\r\n");
-    printf("\033[1;92m""Test result: OK.\033[0m\r\n"); 
-  }
-  else
-  {
+    /* Case 1: DMA transfer shall complete normally */
+    
     /* HPDMA shall be able to complete the transfer */
     /* Wait for transfer completion */
     HAL_Delay(2);
@@ -587,14 +579,98 @@ static void HPDMA_TestCase_Sem_CID(uint32_t cid)
       Error_Handler();
     }
       
-    /* End of test */
-    HPDMA1_DeInit();
     /* test case ended as expected      */
     BSP_LED_On(LED_BLUE);
     BSP_LED_On(LED_GREEN);
-    printf("\033[1;94m""\r\nDMA Transfer completed.\033[0m\r\n");
+    printf("\033[1;96m""\r\nDMA Transfer completed.\033[0m\r\n");
     printf("\033[1;92m""Test result: OK.\033[0m\r\n");  
   }
+  else if ( syscfg_dmacid == 5 )
+  {
+    /* Case 2: IAC event happens because SRAM1 (CID4) is accessed by HPDMA Channel 12 (CID5) */
+    
+      /* IAC SRAM1 error expected */
+
+      /* Switch back from unprivileged to privileged -------------------*/
+      /* Generate a system call exception, and in the ISR switch back Thread mode
+        to privileged */
+      __SVC();
+
+      /* Check if privileged */
+      if((__get_CONTROL() & 1U) != 0U)
+      {
+        /* unprivileged detected */
+        Error_Handler();
+      }
+
+      /* Was SRAM1 illegal detected */
+      /* IAC illegal checking       */
+      if(HAL_RIF_IAC_GetFlag(RIF_RCC_PERIPH_INDEX_AXISRAM1) == 0U)
+      {
+        Error_Handler();
+      }     
+
+      /* RISAL illegal checking     */
+      RISAF_IllegalAccess_t illegal_access;
+      HAL_RIF_RISAF_GetIllegalAccess(RISAF2, &illegal_access);
+
+     /* Primary region filtering applies: there should not be an illegal access */
+      if (illegal_access.ErrorType != RISAF_ILLEGAL_ACCESS)
+      {
+        Error_Handler();
+      }
+
+      /* Illegal access seen at aIntermediate_Buffer */
+      if (illegal_access.Data.AccessType != RIF_ACCTYPE_WRITE ||
+          illegal_access.Data.Address    != 0x340E0000 ||  /* aIntermediate_Buffer */
+          illegal_access.Data.CID        != RIF_CID_5 ||
+          illegal_access.Data.SecPriv    != (RIF_ATTRIBUTE_SEC |
+                                             RIF_ATTRIBUTE_NPRIV))
+      {
+        Error_Handler();
+      }
+      
+      /* test case ended as expected      */
+      BSP_LED_On(LED_RED);
+      BSP_LED_On(LED_GREEN);
+      printf("\033[1;95m""\r\nIAC event (Peripheral: AXISRAM1) detected.\033[0m\r\n");      
+      printf("\033[1;92m""Test result: OK.\033[0m\r\n");
+  }
+  else 
+  {
+    /* Case 3: IAC event happens because HPDMA Channel 12 (CID4/5) register is accessed by CPU (CID != 4/5) */
+    
+    /* IAC SRAM1 error expected */
+
+    /* Switch back from unprivileged to privileged -------------------*/
+    /* Generate a system call exception, and in the ISR switch back Thread mode
+      to privileged */
+    __SVC();
+
+    /* Check if privileged */
+    if((__get_CONTROL() & 1U) != 0U)
+    {
+      /* unprivileged detected */
+      Error_Handler();
+    }
+
+    /* Was HPDMA1 illegal detected */
+    if(HAL_RIF_IAC_GetFlag(RIF_AWARE_PERIPH_INDEX_HPDMA1) == 0U)
+    {
+      Error_Handler();
+    }
+    
+    /* test case ended as expected      */
+    BSP_LED_On(LED_RED);
+    BSP_LED_On(LED_GREEN);
+    printf("\033[1;91m""\r\nIAC event (HPDMA1) detected.\033[0m\r\n");
+    printf("\033[1;92m""Test result: OK.\033[0m\r\n"); 
+  }
+  
+  /* End of test */
+  HAL_SYSCFG_SetPerceivedCID(1);
+  HAL_SYSCFG_SetPerceivedPrivCID(1);
+  HPDMA1_DeInit();
 }
 
 /**
@@ -632,7 +708,7 @@ int main(void)
 
   /* USER CODE BEGIN Init */
   /* USER CODE BEGIN 1 */
-  RISAF_Config();
+  RISAF_Config_RISAF3();
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -662,20 +738,21 @@ int main(void)
     
   print_test_menu();  
     
-  while(1)
+  while(loop)
   {    
     while( HAL_UART_Receive (&hcom_uart[COM1], (uint8_t *) &ch, 1, HAL_MAX_DELAY) != HAL_OK){};
 
+    printf("%c\r\n",ch);
     switch(ch)
     {
       case '1':
-        HPDMA_TestCase_Static_CID(4, RIF_CID_4);
+        HPDMA_TestCase_Static_CID(4, 4);
         break;
       case '2':
-        HPDMA_TestCase_Static_CID(5, RIF_CID_4);
+        HPDMA_TestCase_Static_CID(5, 4);
         break;
       case '3' :  
-        HPDMA_TestCase_Static_CID(4, RIF_CID_5);
+        HPDMA_TestCase_Static_CID(4, 5);
         break;  
       case '4':
         HPDMA_TestCase_Sem_CID(4);
@@ -683,232 +760,23 @@ int main(void)
       case '5':
         HPDMA_TestCase_Sem_CID(5);
         break;  
+      case '6':
+        HPDMA_TestCase_Sem_CID(6);
+        break;  
       case 'x':
               loop = 0; // exit from menu
         break;
       default: 
+        printf("Invalid value!\r\n");
         break;
     }
     print_test_menu();    
   }
   
-  /* Initialize all configured peripherals */
-  /* USER CODE BEGIN 2 */
-  /* Configure HPDMA channel 12 */
-  /* - Channel:  secure */
-  /* - Source and destination: secure/secure */
-  /* - CID 4 selected and isolation filtering enable */
-  HPDMA1_Init();
-
-  /* Perceive CID set to 4 */
-  /* From now on all AHB secure user accesses which arrive at the HPDMA, appear to carry the CID 4 */
-  /* (AHB secure user accesses = access of DMA control registers) */
-#if defined (STEP1) || defined (STEP3)
-  HAL_SYSCFG_SetPerceivedCID(4);
-#endif   /* STEP1 || STEP3 */
-#if defined (STEP2)
-  HAL_SYSCFG_SetPerceivedCID(5);  /* IAC HPDMA error expected */
-#endif   /* STEP2 */
-
-#if defined (STEP1) || defined (STEP3)
-  if (HAL_SYSCFG_GetPerceivedCID()  != 4)
-#endif   /* STEP1 || STEP3 */
-#if defined (STEP2)
-  if (HAL_SYSCFG_GetPerceivedCID()  != 5)
-#endif   /* STEP2 */
-  {
-    /* Perceived CID not set */
-    Error_Handler();
-  }
-
-  /* Switch from privileged to unprivileged */
-  __set_CONTROL(0x1);
-  __ISB();
-
-  /* get the semaphore */
-  HPDMA1_Channel12->RESERVED1[0] |= 1;
-  __ISB();
-  __DSB();
-  
-  /* Reset transferErrorDetected to 0, it will be set to 1 if a transfer error is detected */
-  transferErrorDetected = 0;
-  /* Reset transferCompleteDetected to 0, it will be set to 1 then 2 if a transfer is correctly completed */
-  dma_transfer_cpltd_counter = 0;
-
-  /* Clean destination buffer */
-  memset((void *)aDST_Buffer, 0x55U, sizeof(aDST_Buffer) );
-
-  /* Execute the the 1st transfer */
-  /* from                         */
-  /*       AXI SRAM2              */
-  /*       CID 1 & 4              */
-  /* To    AXI SRAM1              */
-  /*       CID 4                  */
-  /* ---------------------------- */
-  if (HAL_DMA_Start_IT(&handle_HPDMA1_Channel12, (uint32_t)&aSRC_Buffer, (uint32_t)aIntermediate_Buffer, sizeof(aDST_Buffer)) != HAL_OK)
-  {
-    /* Transfer Error */
-    Error_Handler();
-  }
-
-#if defined (STEP2)
-  /* IAC HPDMA error expected */
-
-  /* Switch back from unprivileged to privileged -------------------*/
-  /* Generate a system call exception, and in the ISR switch back Thread mode
-    to privileged */
-  __SVC();
-
-  /* Check if privileged */
-  if((__get_CONTROL() & 1U) != 0U)
-  {
-    /* unprivileged detected */
-    Error_Handler();
-  }
-
-  /* Was HPDMA1 illegal detected */
-  if(HAL_RIF_IAC_GetFlag(RIF_AWARE_PERIPH_INDEX_HPDMA1) == 0U)
-  {
-    Error_Handler();
-  }
-
-  /* End of example - STEP2       */
-  /* STEP2 ended as expected      */
-  BSP_LED_On(LED_GREEN);
-
-  while(1)
-  {
-  }
-#endif /* STEP2 */
-#if defined (STEP3)
-  /* IAC SRAM1 error expected */
-
-  /* Switch back from unprivileged to privileged -------------------*/
-  /* Generate a system call exception, and in the ISR switch back Thread mode
-    to privileged */
-  __SVC();
-
-  /* Check if privileged */
-  if((__get_CONTROL() & 1U) != 0U)
-  {
-    /* unprivileged detected */
-    Error_Handler();
-  }
-
-  /* Was SRAM1 illegal detected */
-  /* IAC illegal checking       */
-  if(HAL_RIF_IAC_GetFlag(RIF_RCC_PERIPH_INDEX_AXISRAM1) == 0U)
-  {
-    Error_Handler();
-  }
-
-  /* RISAL illegal checking     */
-  RISAF_IllegalAccess_t illegal_access;
-  HAL_RIF_RISAF_GetIllegalAccess(RISAF2, &illegal_access);
-
- /* Primary region filtering applies: there should not be an illegal access */
-  if (illegal_access.ErrorType != RISAF_ILLEGAL_ACCESS)
-  {
-    Error_Handler();
-  }
-
-  /* Illegal access seen at aIntermediate_Buffer */
-  if (illegal_access.Data.AccessType != RIF_ACCTYPE_WRITE ||
-      illegal_access.Data.Address    != 0x340E0000 ||  /* aIntermediate_Buffer */
-      illegal_access.Data.CID        != RIF_CID_4 ||
-      illegal_access.Data.SecPriv    != (RIF_ATTRIBUTE_SEC |
-                                         RIF_ATTRIBUTE_NPRIV))
-  {
-    Error_Handler();
-  }
-
-  /* End of example - STEP3       */
-  /* STEP3 ended as expected      */
-  BSP_LED_On(LED_GREEN);
-
-  while(1)
-  {
-  }
-#endif /* STEP2 */
-
-  /* Wait for transfer completion */
-  HAL_Delay(2);
-
-  /* Check DMA error */
-  if (transferErrorDetected == 1U)
-  {
-    Error_Handler();
-  }
-
-  /* 1st transfer done as per HPDMA */
-  if (dma_transfer_cpltd_counter != 1)
-  {
-    Error_Handler();
-  }
-
-  /* Execute the the 2nd transfer */
-  /* from                         */
-  /*       AXI SRAM1              */
-  /*       CID 4                  */
-  /* To    AXI SRAM2              */
-  /*       CID 1 & 4              */
-  /* ---------------------------- */
-  if (HAL_DMA_Start_IT(&handle_HPDMA1_Channel12, (uint32_t)aIntermediate_Buffer, (uint32_t) (aDST_Buffer), sizeof(aDST_Buffer)) != HAL_OK)
-  {
-    /* Transfer Error */
-    Error_Handler();
-  }
-
-  /* Wait for transfer completion */
-  HAL_Delay(2);
-
-  /* Check DMA error */
-  if (transferErrorDetected == 1U)
-  {
-    Error_Handler();
-  }
-
-  /* 2nd transfer done as per HPDMA */
-  if (dma_transfer_cpltd_counter != 2)
-  {
-    Error_Handler();
-  }
-
-  /* Switch back from unprivileged to privileged -------------------*/
-  /* Generate a system call exception, and in the ISR switch back Thread mode
-    to privileged */
-  __SVC();
-
-  /* Check if privileged */
-  if((__get_CONTROL() & 1U) != 0U)
-  {
-    /* unprivileged detected */
-    Error_Handler();
-  }
-
-  /* Perceived CID is set back to 1 (Cortex CID) */
-  HAL_SYSCFG_SetPerceivedCID(1);
-
-  if (HAL_SYSCFG_GetPerceivedCID()  != 1)
-  {
-    Error_Handler();
-  }
-
-  /* Check that data are properly received in aDST_Buffer */
-  if (Buffercmp((uint8_t *)aSRC_Buffer, (uint8_t *)aDST_Buffer, BUFFER_SIZE_IN_BYTES) != 0U)
-  {
-    /* Transfer Error */
-    Error_Handler();
-  }
-
-  /* Further check should the source buffer is not initialized (IDE may behave differently) */
-  if (aDST_Buffer[0U] != 0x102030405060708U)
-  {
-    /* Transfer Error */
-    Error_Handler();
-  }
     
   /* End of example */
+  BSP_LED_Off(LED_RED);
+  BSP_LED_Off(LED_BLUE);
   BSP_LED_On(LED_GREEN);
 
   /* USER CODE END 2 */
@@ -1111,7 +979,7 @@ void MPU_Config(void)
   * @param None
   * @retval None
   */
-void RISAF_Config(void)
+void RISAF_Config_RISAF3(void)
 {
   RISAF_BaseRegionConfig_t risaf_base_config;
 
@@ -1132,23 +1000,16 @@ void RISAF_Config_RISAF2(uint32_t cid_whitelist)
 {
   RISAF_BaseRegionConfig_t risaf_base_config;
 
-  /* Base region: data accessible only by secure master */
+  /* Another region with different */
   risaf_base_config.Filtering = RISAF_FILTER_ENABLE;
   risaf_base_config.Secure = RIF_ATTRIBUTE_SEC;
   risaf_base_config.PrivWhitelist = RIF_CID_NONE;
-  risaf_base_config.WriteWhitelist = (RIF_CID_1 | RIF_CID_4); /* CID 1 for code execution */
-  risaf_base_config.ReadWhitelist =  (RIF_CID_1 | RIF_CID_4); /* CID4 as 2 buffers used in test */
-
-  risaf_base_config.StartAddress = protected_address_start;
-  risaf_base_config.EndAddress = protected_address_end_A;
-
-  HAL_RIF_RISAF_ConfigBaseRegion(RISAF3, RISAF_REGION_1, &risaf_base_config);
-
-    /* Another region with different */
-  risaf_base_config.Filtering = RISAF_FILTER_ENABLE;
-  risaf_base_config.Secure = RIF_ATTRIBUTE_SEC;
-  risaf_base_config.PrivWhitelist = RIF_CID_NONE;
-  risaf_base_config.WriteWhitelist = (cid_whitelist);  /* CID4 as 1 intermediate buffer used in test */
+  /* 
+    CID4 as 1 intermediate buffer used in test for OK case
+    CID5 for KO case (IAC event expected if CID not in line with HPDMA CID config)
+  */
+  risaf_base_config.WriteWhitelist = (cid_whitelist);  
+  risaf_base_config.ReadWhitelist = (cid_whitelist);  
 
   risaf_base_config.StartAddress = protected_address_start;
   risaf_base_config.EndAddress = protected_address_end_B;
@@ -1163,10 +1024,24 @@ void RISAF_Config_RISAF2(uint32_t cid_whitelist)
   */
 static void HPDMA1_DeInit(void)
 {
+  DMA_IsolationConfigTypeDef IsolationConfiginput;
+  
+  HAL_NVIC_DisableIRQ(HPDMA1_Channel12_IRQn);
+
+  /* DMA channel CID filtering disable*/
+  IsolationConfiginput.CidFiltering =  DMA_ISOLATION_OFF;
+  IsolationConfiginput.StaticCid = DMA_CHANNEL_STATIC_CID_1;
+
+  /* First disable CID filtering, then CPU can De-init the channel */
+  if(HAL_DMA_SetIsolationAttributes(&handle_HPDMA1_Channel12 , &IsolationConfiginput) != HAL_OK)
+  {
+    Error_Handler();
+  };
+  
   if (HAL_DMA_DeInit(&handle_HPDMA1_Channel12) != HAL_OK)
   {
     Error_Handler();
-  }  
+  }    
 }
 
 /**
@@ -1228,7 +1103,7 @@ static void HPDMA1_Init(void)
 
   if(HAL_DMA_SetIsolationAttributes(&handle_HPDMA1_Channel12 , &IsolationConfiginput) != HAL_OK)
   {
-    while(1);
+    Error_Handler();
   };
 }
 
