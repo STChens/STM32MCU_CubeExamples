@@ -66,6 +66,34 @@ void open_full_debug(int ns_only) {
   HAL_BSEC_ConfigDebug(&sBsecHandler, &dbgCfg);
 }
 
+void get_dbg_state(uint32_t *apunlock, BSEC_DebugCfgTypeDef *pDbgCfg, uint32_t *hdpl)
+{
+  BSEC_HandleTypeDef sBsecHandler = {.Instance = BSEC};
+  static uint32_t ap, hdp, read=0;
+  static BSEC_DebugCfgTypeDef dbg;
+
+  if ( read == 0 )
+  {
+	  HAL_BSEC_GetDebugLockState(&sBsecHandler, &ap);
+	  HAL_BSEC_GetDebugConfig(&sBsecHandler, &dbg);
+	  HAL_BSEC_GetHDPLValue(&sBsecHandler, &hdp);
+	  read++;
+  }
+
+  if ( apunlock != NULL )
+  {
+	  *apunlock = ap;
+  }
+  if ( pDbgCfg != NULL )
+  {
+	  *pDbgCfg = dbg;
+  }
+  if ( hdpl != NULL )
+  {
+	  *hdpl = hdp;
+  }
+}
+
 /**
   * @brief  Main program
   * @param  None

@@ -35,6 +35,8 @@ extern ARM_DRIVER_FLASH Driver_EXT_FLASH0;
 /* Global variables ----------------------------------------------------------*/
 void *pSecureFault_Callback = NULL;   /* Pointer to secure fault callback in Non-secure */
 void *pSecureError_Callback = NULL;   /* Pointer to secure error callback in Non-secure */
+void *pSecureFault_pData = NULL;
+void *pSecureError_pData = NULL;
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private defines -----------------------------------------------------------*/
@@ -50,20 +52,7 @@ CMSE_NS_ENTRY void SECURE_EnableNSDebug(void)
 
 CMSE_NS_ENTRY void SECURE_GetDebugState(uint32_t *apunlock, BSEC_DebugCfgTypeDef *pDbgCfg, uint32_t *hdpl)
 {
-  BSEC_HandleTypeDef sBsecHandler = {.Instance = BSEC};
-
-  if ( apunlock != NULL )
-  {
-	HAL_BSEC_GetDebugLockState(&sBsecHandler, apunlock);
-  }
-  if ( pDbgCfg != NULL )
-  {
-	  HAL_BSEC_GetDebugConfig(&sBsecHandler, pDbgCfg);
-  }
-  if ( hdpl != NULL )
-  {
-    HAL_BSEC_GetHDPLValue(&sBsecHandler, hdpl);
-  }
+	get_dbg_state(apunlock, pDbgCfg, hdpl);
 }
 
 /**
@@ -72,7 +61,7 @@ CMSE_NS_ENTRY void SECURE_GetDebugState(uint32_t *apunlock, BSEC_DebugCfgTypeDef
   * @param  func        pointer to non-secure function
   * @retval None
   */
-CMSE_NS_ENTRY void SECURE_RegisterCallback(SECURE_CallbackIDTypeDef CallbackId, void *func)
+CMSE_NS_ENTRY void SECURE_RegisterCallback(SECURE_CallbackIDTypeDef CallbackId, void *func, void *pdata)
 {
   if(func != NULL)
   {
@@ -80,9 +69,11 @@ CMSE_NS_ENTRY void SECURE_RegisterCallback(SECURE_CallbackIDTypeDef CallbackId, 
     {
       case SECURE_FAULT_CB_ID:           /* SecureFault IT */
         pSecureFault_Callback = func;
+        pSecureFault_pData = pdata;
         break;
       case IAC_ERROR_CB_ID:             /* Illegal access IT */
         pSecureError_Callback = func;
+        pSecureError_pData = pdata;
         break;
       default:
         /* unknown */

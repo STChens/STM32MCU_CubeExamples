@@ -32,10 +32,25 @@ typedef enum
   IAC_ERROR_CB_ID        = 0x01U, /*!< Illegal access secure error callback ID */
 } SECURE_CallbackIDTypeDef;
 
+typedef struct {
+  uint32_t iac_iisr[6];  
+}IAC_Info_t;
+
+typedef struct {
+  uint32_t cfsr;
+  uint32_t cfsr_ns;
+  uint32_t mmfar;
+  uint32_t bfar;
+  uint32_t sfsr;
+  uint32_t sfar;
+  uint32_t tamp_sr;
+}Fault_Info_t;
+
+
 /* Exported constants --------------------------------------------------------*/
 /* Exported macros -----------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
-void SECURE_RegisterCallback(SECURE_CallbackIDTypeDef CallbackId, void *func);
+void SECURE_RegisterCallback(SECURE_CallbackIDTypeDef CallbackId, void *func, void *pdata);
 
 void SECURE_GetInfo(ARM_FLASH_INFO* data);
 int32_t SECURE_EraseSector(uint32_t addr);

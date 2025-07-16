@@ -20,10 +20,13 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32n6xx_it.h"
+#include "secure_nsc.h"
 
 extern funcptr_NS pSecureFault_Callback;
 extern funcptr_NS pSecureError_Callback;
 extern funcptr_NS pSecureIT_Callback;
+extern void *pSecureFault_pData;
+extern void *pSecureError_pData;
 
 #if defined(__ICCARM__)
 typedef void (CMSE_NS_CALL *SecureFault_Callback)(void);
@@ -56,6 +59,53 @@ void NMI_Handler(void)
 {
 }
 
+void save_log(uint32_t lr, uint32_t msp, uint32_t msp_ns)
+{
+  uint32_t *pfootprint = (uint32_t*)(0x38000100);
+  *pfootprint = pfootprint;
+  *pfootprint++ = SCB->CFSR;
+  *pfootprint++ = SCB_NS->CFSR;
+  *pfootprint++ = SCB->SFSR;
+  *pfootprint++ = SCB->SFAR;
+  *pfootprint++ = SCB->BFAR;
+  *pfootprint++ = SCB->MMFAR;
+  *pfootprint++ = lr;
+  if ( (lr & 0xa0) == 0xa0) // NS triggered the fault
+  {
+	  *pfootprint++ = msp_ns;
+	  *pfootprint++ = *(uint32_t *)msp_ns;
+	  *pfootprint++ = *(uint32_t *)(msp_ns+4); // R0
+	  *pfootprint++ = *(uint32_t *)(msp_ns+8); // R1
+	  *pfootprint++ = *(uint32_t *)(msp_ns+12); // R2
+	  *pfootprint++ = *(uint32_t *)(msp_ns+16); // R3
+	  *pfootprint++ = *(uint32_t *)(msp_ns+20); // R12
+	  *pfootprint++ = *(uint32_t *)(msp_ns+20); // LR
+	  *pfootprint++ = *(uint32_t *)(msp_ns+20); // PC
+	  *pfootprint++ = *(uint32_t *)(msp_ns+20); // xPSR
+  }
+  else
+  {
+	  *pfootprint++ = msp;
+	  *pfootprint++ = *(uint32_t *)msp_ns;
+	  *pfootprint++ = *(uint32_t *)(msp+4); // R0
+	  *pfootprint++ = *(uint32_t *)(msp+8); // R1
+	  *pfootprint++ = *(uint32_t *)(msp+12); // R2
+	  *pfootprint++ = *(uint32_t *)(msp+16); // R3
+	  *pfootprint++ = *(uint32_t *)(msp+20); // R12
+	  *pfootprint++ = *(uint32_t *)(msp+20); // LR
+	  *pfootprint++ = *(uint32_t *)(msp+20); // PC
+	  *pfootprint++ = *(uint32_t *)(msp+20); // xPSR
+  }
+  *pfootprint++ = 0;
+  *pfootprint++ = 0;
+  *pfootprint++ = 0;
+  *pfootprint++ = 0;
+  *pfootprint++ = 0;
+  *pfootprint++ = 0;
+  *pfootprint++ = 0;
+  *pfootprint++ = 0;
+}
+
 /**
   * @brief  This function handles Hard Fault exception.
   * @param  None
@@ -63,6 +113,38 @@ void NMI_Handler(void)
   */
 void HardFault_Handler(void)
 {
+  __asm volatile (
+      "MOV R0, LR\n"
+
+      "MRS R1, MSP\n"
+
+      "MRS R2, MSP_NS\n"
+
+      // 跳转到C函数进行后续处理
+      "B save_log\n"
+  );
+
+  funcptr_NS callback_NS; // non-secure callback function pointer
+
+  if(pSecureFault_Callback != (funcptr_NS)NULL)
+  {
+    if ( pSecureFault_pData != NULL )
+    {
+      Fault_Info_t *info = (Fault_Info_t *)pSecureFault_pData;
+      info->cfsr = SCB->CFSR;
+      info->cfsr_ns = SCB_NS->CFSR;
+      info->mmfar = SCB->MMFAR;
+      info->bfar = SCB->BFAR;
+      info->sfsr = SAU->SFSR;
+      info->sfar = SAU->SFSR;
+      info->tamp_sr = TAMP->SR;
+    }
+   /* return function pointer with cleared LSB */
+   callback_NS = (funcptr_NS)cmse_nsfptr_create(pSecureFault_Callback);
+
+   callback_NS();
+  }
+
   /* Go to infinite loop when Hard Fault exception occurs */
   while (1)
   {
@@ -76,6 +158,18 @@ void HardFault_Handler(void)
   */
 void MemManage_Handler(void)
 {
+  __asm volatile (
+	  "MOV R0, LR\n"
+
+	  "MRS R1, MSP\n"
+
+	  // 读取MSP_NS寄存器到R2（通过VTOR基址+0x00获取MSP_NS）
+	  "LDR R2, =0xE000ED00\n"  // VTOR基址（向量表起始地址）
+	  "LDR R2, [R2]\n"         // 读取MSP_NS的值
+
+	  // 跳转到C函数进行后续处理
+	  "B save_log\n"
+  );
   /* Go to infinite loop when Memory Manage exception occurs */
   while (1)
   {
@@ -89,6 +183,18 @@ void MemManage_Handler(void)
   */
 void BusFault_Handler(void)
 {
+  __asm volatile (
+	  "MOV R0, LR\n"
+
+	  "MRS R1, MSP\n"
+
+	  // 读取MSP_NS寄存器到R2（通过VTOR基址+0x00获取MSP_NS）
+	  "LDR R2, =0xE000ED00\n"  // VTOR基址（向量表起始地址）
+	  "LDR R2, [R2]\n"         // 读取MSP_NS的值
+
+	  // 跳转到C函数进行后续处理
+	  "B save_log\n"
+  );
   /* Go to infinite loop when Bus Fault exception occurs */
   while (1)
   {
@@ -102,6 +208,18 @@ void BusFault_Handler(void)
   */
 void UsageFault_Handler(void)
 {
+  __asm volatile (
+	  "MOV R0, LR\n"
+
+	  "MRS R1, MSP\n"
+
+	  // 读取MSP_NS寄存器到R2（通过VTOR基址+0x00获取MSP_NS）
+	  "LDR R2, =0xE000ED00\n"  // VTOR基址（向量表起始地址）
+	  "LDR R2, [R2]\n"         // 读取MSP_NS的值
+
+	  // 跳转到C函数进行后续处理
+	  "B save_log\n"
+  );
   /* Go to infinite loop when Usage Fault exception occurs */
   while (1)
   {
@@ -115,10 +233,33 @@ void UsageFault_Handler(void)
   */
 void SecureFault_Handler(void)
 {
+  __asm volatile (
+	  "MOV R0, LR\n"
+
+	  "MRS R1, MSP\n"
+
+	  // 读取MSP_NS寄存器到R2（通过VTOR基址+0x00获取MSP_NS）
+	  "LDR R2, =0xE000ED00\n"  // VTOR基址（向量表起始地址）
+	  "LDR R2, [R2]\n"         // 读取MSP_NS的值
+
+	  // 跳转到C函数进行后续处理
+	  "B save_log\n"
+  );
   funcptr_NS callback_NS; // non-secure callback function pointer
 
   if(pSecureFault_Callback != (funcptr_NS)NULL)
   {
+    if ( pSecureFault_pData != NULL )
+    {
+      Fault_Info_t *info = (Fault_Info_t *)pSecureFault_pData;
+      info->cfsr = SCB->CFSR;
+      info->cfsr_ns = SCB_NS->CFSR;
+      info->mmfar = SCB->MMFAR;
+      info->bfar = SCB->BFAR;
+      info->sfsr = SAU->SFSR;
+      info->sfar = SAU->SFSR;
+      info->tamp_sr = TAMP->SR;
+    }
    /* return function pointer with cleared LSB */
    callback_NS = (funcptr_NS)cmse_nsfptr_create(pSecureFault_Callback);
 
@@ -200,12 +341,24 @@ void SysTick_Handler(void)
   */
 void IAC_IRQHandler(void)
 {
+  uint32_t *pfootprint = (uint32_t*)(0x38000200);
+  *pfootprint = pfootprint;
+
   funcptr_NS callback_NS; // non-secure callback function pointer
 
-  open_full_debug(0);
   if(pSecureError_Callback != (funcptr_NS)NULL)
   {
-   /* return function pointer with cleared LSB */
+    if ( pSecureError_pData != NULL )
+    {
+      IAC_Info_t *iac = (IAC_Info_t *)pSecureError_pData;
+      iac->iac_iisr[0] = *(volatile uint32_t *)(IAC_BASE + 0x36C);
+      iac->iac_iisr[1] = *(volatile uint32_t *)(IAC_BASE + 0x36C+4);
+      iac->iac_iisr[2] = *(volatile uint32_t *)(IAC_BASE + 0x36C+8);
+      iac->iac_iisr[3] = *(volatile uint32_t *)(IAC_BASE + 0x36C+12);
+      iac->iac_iisr[4] = *(volatile uint32_t *)(IAC_BASE + 0x36C+16);
+      iac->iac_iisr[5] = *(volatile uint32_t *)(IAC_BASE + 0x36C+20);
+    }
+   /* return function pointer with cleared LSB */    
    callback_NS = (funcptr_NS)cmse_nsfptr_create(pSecureError_Callback);
 
    callback_NS();

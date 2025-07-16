@@ -57,5 +57,6 @@ typedef void CMSE_NS_CALL (*funcptr)(void);
 
 /* Exported variables ------------------------------------------------------- */
 void open_full_debug(int ns_only);
+void get_dbg_state(uint32_t *apunlock, BSEC_DebugCfgTypeDef *pDbgCfg, uint32_t *hdpl);
 /******************************************************************************/
 #endif /* MAIN_H */
