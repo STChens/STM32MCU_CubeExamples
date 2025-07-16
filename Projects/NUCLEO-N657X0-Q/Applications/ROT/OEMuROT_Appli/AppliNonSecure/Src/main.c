@@ -173,6 +173,7 @@ void FW_APP_PrintMainMenu(void)
 {
   printf("\r\n=================== Main Menu ============================\r\n\n");
   printf("  Enable non-secure debug ------------------------------- d\r\n\n");
+	printf("  Enable full debug (s+ns) ------------------------------ f\r\n\n");
   printf("  Get debug enable state  ------------------------------- s\r\n\n");
 #if (NS_DATA_IMAGE_NUMBER == 1)
   printf("  Non-Secure Data --------------------------------------- 1\r\n\n");
@@ -207,7 +208,11 @@ void FW_APP_Run(void)
       {
         case 'd' :
           printf("  Call NSC API to enable debug for Non-secure part \r\n\n");
-          SECURE_EnableNSDebug();
+          SECURE_EnableDebug(1);
+          break;
+				case 'f' :
+          printf("  Call NSC API to enable full debug for S and NS part \r\n\n");
+          SECURE_EnableDebug(0);
           break;
 
         case 's' :

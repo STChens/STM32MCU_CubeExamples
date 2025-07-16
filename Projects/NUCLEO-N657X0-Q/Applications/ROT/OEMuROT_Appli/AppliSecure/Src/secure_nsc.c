@@ -45,9 +45,9 @@ void *pSecureError_pData = NULL;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
-CMSE_NS_ENTRY void SECURE_EnableNSDebug(void)
+CMSE_NS_ENTRY void SECURE_EnableDebug(uint32_t ns_only)
 {
-  open_full_debug(1);
+  open_full_debug(ns_only);
 }
 
 CMSE_NS_ENTRY void SECURE_GetDebugState(uint32_t *apunlock, BSEC_DebugCfgTypeDef *pDbgCfg, uint32_t *hdpl)

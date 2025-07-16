@@ -62,7 +62,7 @@ void NMI_Handler(void)
 void save_log(uint32_t lr, uint32_t msp, uint32_t msp_ns)
 {
   uint32_t *pfootprint = (uint32_t*)(0x38000100);
-  *pfootprint = pfootprint;
+  *pfootprint = (uint32_t)pfootprint;
   *pfootprint++ = SCB->CFSR;
   *pfootprint++ = SCB_NS->CFSR;
   *pfootprint++ = SCB->SFSR;
@@ -106,6 +106,8 @@ void save_log(uint32_t lr, uint32_t msp, uint32_t msp_ns)
   *pfootprint++ = 0;
 }
 
+funcptr_NS callback_NS; // non-secure callback function pointer
+
 /**
   * @brief  This function handles Hard Fault exception.
   * @param  None
@@ -124,7 +126,6 @@ void HardFault_Handler(void)
       "B save_log\n"
   );
 
-  funcptr_NS callback_NS; // non-secure callback function pointer
 
   if(pSecureFault_Callback != (funcptr_NS)NULL)
   {
@@ -245,7 +246,6 @@ void SecureFault_Handler(void)
 	  // 跳转到C函数进行后续处理
 	  "B save_log\n"
   );
-  funcptr_NS callback_NS; // non-secure callback function pointer
 
   if(pSecureFault_Callback != (funcptr_NS)NULL)
   {
@@ -342,7 +342,7 @@ void SysTick_Handler(void)
 void IAC_IRQHandler(void)
 {
   uint32_t *pfootprint = (uint32_t*)(0x38000200);
-  *pfootprint = pfootprint;
+  *pfootprint = (uint32_t)pfootprint;
 
   funcptr_NS callback_NS; // non-secure callback function pointer
 
