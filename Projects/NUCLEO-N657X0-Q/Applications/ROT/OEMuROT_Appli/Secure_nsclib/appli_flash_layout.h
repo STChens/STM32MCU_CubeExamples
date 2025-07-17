@@ -29,16 +29,16 @@
 #define NS_DATA_ADDRESS                0x240F0400  /* Non secure data address */
 
 #define S_APPLI_OFFSET                 0x80000  /* Secure application primary slot offset */
-#define NS_APPLI_OFFSET                0xA0000  /* Non secure application primary slot offset */
-#define S_DATA_OFFSET                  0x90000  /* Secure data primary slot offset */
-#define NS_DATA_OFFSET                 0xC0000  /* Non secure data primary slot offset */
+#define NS_APPLI_OFFSET                0xB0000  /* Non secure application primary slot offset */
+#define S_DATA_OFFSET                  0xA0000  /* Secure data primary slot offset */
+#define NS_DATA_OFFSET                 0xD0000  /* Non secure data primary slot offset */
 
-#define S_APPLI_SECONDARY_OFFSET       0xD0000  /* Secure application secondary slot offset */
-#define NS_APPLI_SECONDARY_OFFSET      0xF0000  /* Non secure application secondary slot offset */
-#define S_DATA_SECONDARY_OFFSET        0xE0000  /* Secure data secondary slot offset */
-#define NS_DATA_SECONDARY_OFFSET       0x110000  /* Non secure data secondary slot offset */
+#define S_APPLI_SECONDARY_OFFSET       0xE0000  /* Secure application secondary slot offset */
+#define NS_APPLI_SECONDARY_OFFSET      0x110000  /* Non secure application secondary slot offset */
+#define S_DATA_SECONDARY_OFFSET        0x100000  /* Secure data secondary slot offset */
+#define NS_DATA_SECONDARY_OFFSET       0x130000  /* Non secure data secondary slot offset */
 
-#define S_APPLI_PARTITION_SIZE         0x10000  /* Secure application partition size */
+#define S_APPLI_PARTITION_SIZE         0x20000  /* Secure application partition size */
 #define NS_APPLI_PARTITION_SIZE        0x20000  /* Non secure application partition size */
 #define S_DATA_PARTITION_SIZE          0x10000  /* Secure data partition size */
 #define NS_DATA_PARTITION_SIZE         0x10000  /* Non secure data partition size */

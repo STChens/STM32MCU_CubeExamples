@@ -6,13 +6,13 @@ setlocal EnableDelayedExpansion
 
 :: Data updated with the postbuild of OEMuROT-Boot
 set bootaddress=0x70000000
-set appli_s_address=0x700D0000
-set data_s_address=0x700E0000
-set appli_ns_address=0x700F0000
-set data_ns_address=0x70110000
+set appli_s_address=0x700E0000
+set data_s_address=0x70100000
+set appli_ns_address=0x70110000
+set data_ns_address=0x70130000
 set s_data_image_number=0x1
 set ns_data_image_number=0x1
-set last_sector=18
+set last_sector=20
 
 set signedbootpath=..\..\%oemurot_boot_path_project%\Binary\OEMuROT_Boot_Trusted.bin
 set appli_s_path=..\..\%oemurot_appli_path_project%\Binary\%oemurot_appli_s%
