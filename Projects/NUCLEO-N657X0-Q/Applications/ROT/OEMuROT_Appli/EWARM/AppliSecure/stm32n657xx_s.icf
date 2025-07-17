@@ -3,9 +3,9 @@
 /* IcfEditorFile="$TOOLKIT_DIR$\config\ide\IcfEditor\cortex_v1_0.xml" */
 /*-Specials-*/
 define exported symbol CODE_S_ADDRESS = 0x34100400;    /* This define is updated automatically from OEMuROT_Boot project */
-define exported symbol CODE_S_SIZE = 0x10000;          /* This define is updated automatically from OEMuROT_Boot project */
-define exported symbol DATA_S_ADDRESS = 0x341e0000;    /* This define is updated automatically from OEMuROT_Boot project */
-define exported symbol DATA_S_SIZE = 0x10000;          /* This define is updated automatically from OEMuROT_Boot project */
+define exported symbol CODE_S_SIZE = 0x20000;          /* This define is updated automatically from OEMuROT_Boot project */
+define exported symbol DATA_S_ADDRESS = 0x34160000;    /* This define is updated automatically from OEMuROT_Boot project */
+define exported symbol DATA_S_SIZE = 0x20000;          /* This define is updated automatically from OEMuROT_Boot project */
 define symbol IMAGE_HEADER_SIZE = 0x400;  /* mcuboot header size */
 define symbol TRAILER_MAX_SIZE = 0x2000;  /* mcuboot trailer max size */
 

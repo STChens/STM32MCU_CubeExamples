@@ -172,9 +172,25 @@ extern void *g_pfnVectors;
   * @brief  Setup the microcontroller system.
   * @retval None
   */
-
+#if	defined TEST_BSEC_READ
+#define LOG_RAM_BASE_ADD 0x240F0000
+#endif
 void SystemInit(void)
-{
+{	
+#if	defined TEST_BSEC_READ
+	
+	
+  int i = 0;
+  uint32_t *p = (uint32_t*)LOG_RAM_BASE_ADD;
+  for (i = 0; i< 512; i++, p++)
+  {
+	  *p = 0;
+  }
+	
+	uint32_t ap = READ_REG(BSEC->AP_UNLOCK);
+  *(uint32_t*)(LOG_RAM_BASE_ADD) =  ap+0x11;
+#endif
+	
   /* Configure the Vector Table location -------------------------------------*/
 #if defined(USER_VECT_TAB_ADDRESS)
   SCB->VTOR = VECT_TAB_BASE_ADDRESS | VECT_TAB_OFFSET;
@@ -182,10 +198,20 @@ void SystemInit(void)
   SCB->VTOR = INTVECT_START;
 #endif  /* USER_VECT_TAB_ADDRESS */
 
+#if	defined TEST_BSEC_READ
+  ap = READ_REG(BSEC->AP_UNLOCK);
+  *(uint32_t*)(LOG_RAM_BASE_ADD+4) =  ap+0x22;
+#endif
+
   /* System configuration setup */
   RCC->APB4ENSR2 = RCC_APB4ENSR2_SYSCFGENS;
   /* Delay after an RCC peripheral clock enabling */
   (void)RCC->APB4ENR2;
+
+#if	defined TEST_BSEC_READ
+  ap = READ_REG(BSEC->AP_UNLOCK);
+  *(uint32_t*)(LOG_RAM_BASE_ADD+8) =  ap+0x33;
+#endif
 
   /* Setup I/O compensation cells for */
   SYSCFG->VDDIO2CCCR = 0x00000278UL; /* SDMMC1 domain compensation */
@@ -193,6 +219,11 @@ void SystemInit(void)
   SYSCFG->VDDIO4CCCR = 0x00000278UL; /* Hexa-SPI domain compensation */
   SYSCFG->VDDIO5CCCR = 0x00000278UL; /* Octo-SPI domain compensation */
   SYSCFG->VDDCCCR    = 0x00000278UL; /* VDD domain compensation */
+
+#if	defined TEST_BSEC_READ
+  ap = READ_REG(BSEC->AP_UNLOCK);
+  *(uint32_t*)(LOG_RAM_BASE_ADD+0xC) =  ap+0x44;
+#endif
 
   /* Set default Vector Table location after system reset or return from Standby */
   SYSCFG->INITSVTORCR = SCB->VTOR;
@@ -206,6 +237,9 @@ void SystemInit(void)
   SCB_NS->CPACR |= ((3UL << 20U)|(3UL << 22U));  /* set CP10 and CP11 Full Access */
 #endif /* __FPU_PRESENT && __FPU_USED */
 
+#if	defined TEST_BSEC_READ
+  *(uint32_t*)(LOG_RAM_BASE_ADD + 0x10) =  ((LOG_RAM_BASE_ADD + 0x10));
+#endif	
 }
 
 /**

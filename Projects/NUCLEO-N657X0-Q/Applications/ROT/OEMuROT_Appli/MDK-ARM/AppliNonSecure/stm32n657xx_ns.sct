@@ -18,13 +18,13 @@
 
 #define CODE_NS_ADDRESS 0x24064400            /* This define is updated automatically from OEMuROT_Boot project */
 #define CODE_NS_SIZE 0x20000                  /* This define is updated automatically from OEMuROT_Boot project */
-#define DATA_NS_ADDRESS 0x240e4000            /* This define is updated automatically from OEMuROT_Boot project */
-#define DATA_NS_SIZE 0xc000                   /* This define is updated automatically from OEMuROT_Boot project */
+#define DATA_NS_ADDRESS 0x240d0000            /* This define is updated automatically from OEMuROT_Boot project */
+#define DATA_NS_SIZE 0x20000                   /* This define is updated automatically from OEMuROT_Boot project */
 
 #define IMAGE_HEADER_SIZE 0x400  /* mcuboot header size */
 #define TRAILER_MAX_SIZE 0x2000  /* mcuboot trailer max size */
 
-#define __STACK_SIZE    0x00001000
+#define __STACK_SIZE    0x00008000
 #define __HEAP_SIZE     0x00001000
 
 LR_CODE CODE_NS_ADDRESS {

@@ -40,6 +40,7 @@ typedef void CMSE_NS_CALL (*SecureIT_Callback)(IRQn_Type IrqLine);
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private defines -----------------------------------------------------------*/
+#define LOG_RAM_BASE_ADD 0x240F0100
 /* Private macros ------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
@@ -61,7 +62,7 @@ void NMI_Handler(void)
 
 void save_log(uint32_t lr, uint32_t msp, uint32_t msp_ns)
 {
-  uint32_t *pfootprint = (uint32_t*)(0x38000100);
+  uint32_t *pfootprint = (uint32_t*)(LOG_RAM_BASE_ADD);
   *pfootprint = (uint32_t)pfootprint;
   *pfootprint++ = SCB->CFSR;
   *pfootprint++ = SCB_NS->CFSR;
@@ -341,7 +342,7 @@ void SysTick_Handler(void)
   */
 void IAC_IRQHandler(void)
 {
-  uint32_t *pfootprint = (uint32_t*)(0x38000200);
+  uint32_t *pfootprint = (uint32_t*)(LOG_RAM_BASE_ADD+0x100);
   *pfootprint = (uint32_t)pfootprint;
 
   funcptr_NS callback_NS; // non-secure callback function pointer
