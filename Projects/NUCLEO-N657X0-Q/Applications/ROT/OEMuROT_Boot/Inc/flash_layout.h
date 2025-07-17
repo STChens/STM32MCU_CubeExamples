@@ -104,7 +104,7 @@
 #define FLASH_AREA_BL2_SECONDARY_OFFSET (0x40000)
 
 /* BL2 partitions size */
-#define FLASH_S_PARTITION_SIZE          (0x10000) /* 64 KB for S partition */
+#define FLASH_S_PARTITION_SIZE          (0x20000) /* 128 KB for S partition */
 #define FLASH_NS_PARTITION_SIZE         (0x20000) /* 128 KB for NS partition */
 #define FLASH_PARTITION_SIZE            (FLASH_S_PARTITION_SIZE + FLASH_NS_PARTITION_SIZE)
 

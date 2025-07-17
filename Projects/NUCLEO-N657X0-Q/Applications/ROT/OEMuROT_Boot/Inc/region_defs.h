@@ -23,12 +23,12 @@
 #define BL2_MSP_STACK_SIZE      0x0001400
 
 #define S_HEAP_SIZE             0x0001000
-#define S_MSP_STACK_SIZE        0x0000800
-#define S_PSP_STACK_SIZE        0x0000800
+#define S_MSP_STACK_SIZE        0x0001000
+#define S_PSP_STACK_SIZE        0x0001000
 
 #define NS_HEAP_SIZE            0x0001000
-#define NS_MSP_STACK_SIZE       0x0000C00
-#define NS_PSP_STACK_SIZE       0x0000C00
+#define NS_MSP_STACK_SIZE       0x0001000
+#define NS_PSP_STACK_SIZE       0x0001000
 
 #define _SRAM1_AXI_BASE_NS     (0x24000000)
 #define _SRAM2_AXI_BASE_S      (0x34100000)   /* Base address of 1 MB system RAM 2 accessible over AXI */
@@ -109,11 +109,11 @@
 #elif (OEMUROT_LOAD_AND_RUN == LOAD_AND_RUN_INT_RAM)
 /* Secure regions */
 #define S_CODE_START                        (S_RAM_ALIAS(0))
-#define S_DATA_START                        (S_RAM_ALIAS(0xE0000))
+#define S_DATA_START                        (S_RAM_ALIAS(0x60000))
 #define S_DATA2_START                       (S_RAM_ALIAS(0xF0000))
 /* Non-secure regions */
 #define NS_CODE_START                       (NS_RAM_ALIAS(0x64000))
-#define NS_DATA_START                       (NS_RAM_ALIAS(0xE4000))
+#define NS_DATA_START                       (NS_RAM_ALIAS(0xD0000))
 #define NS_DATA2_START                      (NS_RAM_ALIAS(0xF0000))
 #elif (OEMUROT_LOAD_AND_RUN == LOAD_AND_RUN_EXT_RAM)
 /* Secure regions */
@@ -130,11 +130,11 @@
 
 /* Secure regions */
 #define S_CODE_SIZE                         (FLASH_S_PARTITION_SIZE - BL2_TRAILER_SIZE)
-#define S_DATA_SIZE                         (0x10000)
+#define S_DATA_SIZE                         (0x20000)
 #define S_DATA2_SIZE                        (FLASH_S_DATA_PARTITION_SIZE - BL2_TRAILER_SIZE)
 /* Non-secure regions */
 #define NS_CODE_SIZE                        (FLASH_NS_PARTITION_SIZE - BL2_TRAILER_SIZE)
-#define NS_DATA_SIZE                        (0xC000)
+#define NS_DATA_SIZE                        (0x20000)
 #define NS_DATA2_SIZE                       (FLASH_NS_DATA_PARTITION_SIZE - BL2_TRAILER_SIZE)
 
 /* Secure regions */
