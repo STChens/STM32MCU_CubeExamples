@@ -5,13 +5,13 @@ source ../env.sh
 
 # Data updated with the postbuild of OEMuROT-Boot
 bootaddress=0x70000000
-appli_s_address=0x70070000
-data_s_address=0x70080000
-appli_ns_address=0x70090000
-data_ns_address=0x700B0000
+appli_s_address=0x700E0000
+data_s_address=0x70100000
+appli_ns_address=0x70110000
+data_ns_address=0x70130000
 s_data_image_number=0x1
 ns_data_image_number=0x1
-last_sector=12
+last_sector=20
 
 signedbootpath=../../$oemurot_boot_path_project/Binary/OEMuROT_Boot_Trusted.bin
 appli_s_path=../../$oemurot_appli_path_project/Binary/$oemurot_appli_s

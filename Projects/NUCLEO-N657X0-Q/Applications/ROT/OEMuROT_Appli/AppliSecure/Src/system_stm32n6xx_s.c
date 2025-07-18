@@ -57,7 +57,7 @@
 
 #include "stm32n6xx.h"
 #include <math.h>
-
+#include "appli_flash_layout.h"
 /**
   * @}
   */
@@ -172,23 +172,14 @@ extern void *g_pfnVectors;
   * @brief  Setup the microcontroller system.
   * @retval None
   */
-#if	defined TEST_BSEC_READ
-#define LOG_RAM_BASE_ADD 0x240F0000
+#if (NS_DATA_IMAGE_NUMBER == 1) && (defined TEST_BSEC_READ)
+#define LOG_RAM_BASE_ADD NS_DATA_ADDRESS
 #endif
+
 void SystemInit(void)
 {	
-#if	defined TEST_BSEC_READ
-	
-	
-  int i = 0;
-  uint32_t *p = (uint32_t*)LOG_RAM_BASE_ADD;
-  for (i = 0; i< 512; i++, p++)
-  {
-	  *p = 0;
-  }
-	
-	uint32_t ap = READ_REG(BSEC->AP_UNLOCK);
-  *(uint32_t*)(LOG_RAM_BASE_ADD) =  ap+0x11;
+#if (NS_DATA_IMAGE_NUMBER == 1) && (defined TEST_BSEC_READ)
+  uint32_t ap;
 #endif
 	
   /* Configure the Vector Table location -------------------------------------*/
@@ -197,21 +188,12 @@ void SystemInit(void)
 #else
   SCB->VTOR = INTVECT_START;
 #endif  /* USER_VECT_TAB_ADDRESS */
-
-#if	defined TEST_BSEC_READ
-  ap = READ_REG(BSEC->AP_UNLOCK);
-  *(uint32_t*)(LOG_RAM_BASE_ADD+4) =  ap+0x22;
-#endif
+  (void)SCB->VTOR;
 
   /* System configuration setup */
   RCC->APB4ENSR2 = RCC_APB4ENSR2_SYSCFGENS;
   /* Delay after an RCC peripheral clock enabling */
   (void)RCC->APB4ENR2;
-
-#if	defined TEST_BSEC_READ
-  ap = READ_REG(BSEC->AP_UNLOCK);
-  *(uint32_t*)(LOG_RAM_BASE_ADD+8) =  ap+0x33;
-#endif
 
   /* Setup I/O compensation cells for */
   SYSCFG->VDDIO2CCCR = 0x00000278UL; /* SDMMC1 domain compensation */
@@ -220,15 +202,23 @@ void SystemInit(void)
   SYSCFG->VDDIO5CCCR = 0x00000278UL; /* Octo-SPI domain compensation */
   SYSCFG->VDDCCCR    = 0x00000278UL; /* VDD domain compensation */
 
-#if	defined TEST_BSEC_READ
-  ap = READ_REG(BSEC->AP_UNLOCK);
-  *(uint32_t*)(LOG_RAM_BASE_ADD+0xC) =  ap+0x44;
-#endif
+  (void)SYSCFG->VDDIO2CCCR;
+  (void)SYSCFG->VDDIO3CCCR;
+  (void)SYSCFG->VDDIO4CCCR;
+  (void)SYSCFG->VDDIO5CCCR;
+  (void)SYSCFG->VDDCCCR;
 
   /* Set default Vector Table location after system reset or return from Standby */
   SYSCFG->INITSVTORCR = SCB->VTOR;
+  __DSB();
+  __ISB();
+  (void) SYSCFG->INITSVTORCR;
+
   /* Deactivate SYSCFG clock */
   RCC->APB4ENCR2 = RCC_APB4ENCR2_SYSCFGENC;
+  __DSB();
+  __ISB();
+  (void)RCC->APB4ENCR2;
 
   /* FPU settings ------------------------------------------------------------*/
 #if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
@@ -237,9 +227,10 @@ void SystemInit(void)
   SCB_NS->CPACR |= ((3UL << 20U)|(3UL << 22U));  /* set CP10 and CP11 Full Access */
 #endif /* __FPU_PRESENT && __FPU_USED */
 
-#if	defined TEST_BSEC_READ
-  *(uint32_t*)(LOG_RAM_BASE_ADD + 0x10) =  ((LOG_RAM_BASE_ADD + 0x10));
-#endif	
+#if (NS_DATA_IMAGE_NUMBER == 1) && (defined TEST_BSEC_READ)
+  ap = READ_REG(BSEC->AP_UNLOCK);
+  *(uint32_t*)(LOG_RAM_BASE_ADD+0x18) =  ap+0x77;
+#endif
 }
 
 /**

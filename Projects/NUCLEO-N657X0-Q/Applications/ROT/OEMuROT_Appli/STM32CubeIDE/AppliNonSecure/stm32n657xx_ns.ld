@@ -31,8 +31,8 @@
 */
 CODE_NS_ADDRESS = 0x24064400;    /* This define is updated automatically from OEMuROT_Boot project */
 CODE_NS_SIZE = 0x20000;          /* This define is updated automatically from OEMuROT_Boot project */
-DATA_NS_ADDRESS = 0x240e4000;    /* This define is updated automatically from OEMuROT_Boot project */
-DATA_NS_SIZE = 0xc000;           /* This define is updated automatically from OEMuROT_Boot project */
+DATA_NS_ADDRESS = 0x240d0000;    /* This define is updated automatically from OEMuROT_Boot project */
+DATA_NS_SIZE = 0x20000;           /* This define is updated automatically from OEMuROT_Boot project */
 IMAGE_HEADER_SIZE = 0x400;       /* mcuboot header size */
 TRAILER_MAX_SIZE = 0x2000;       /* mcuboot trailer max size */
 

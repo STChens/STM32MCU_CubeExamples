@@ -21,6 +21,7 @@
 #include "main.h"
 #include "stm32n6xx_it.h"
 #include "secure_nsc.h"
+#include "appli_flash_layout.h"
 
 extern funcptr_NS pSecureFault_Callback;
 extern funcptr_NS pSecureError_Callback;
@@ -40,7 +41,9 @@ typedef void CMSE_NS_CALL (*SecureIT_Callback)(IRQn_Type IrqLine);
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private defines -----------------------------------------------------------*/
-#define LOG_RAM_BASE_ADD 0x240F0100
+#if (NS_DATA_IMAGE_NUMBER == 1)
+#define LOG_RAM_BASE_ADD NS_DATA_ADDRESS
+#endif
 /* Private macros ------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
@@ -62,7 +65,8 @@ void NMI_Handler(void)
 
 void save_log(uint32_t lr, uint32_t msp, uint32_t msp_ns)
 {
-  uint32_t *pfootprint = (uint32_t*)(LOG_RAM_BASE_ADD);
+#if (NS_DATA_IMAGE_NUMBER == 1)
+  uint32_t *pfootprint = (uint32_t*)(LOG_RAM_BASE_ADD+0x100);
   *pfootprint = (uint32_t)pfootprint;
   *pfootprint++ = SCB->CFSR;
   *pfootprint++ = SCB_NS->CFSR;
@@ -105,6 +109,7 @@ void save_log(uint32_t lr, uint32_t msp, uint32_t msp_ns)
   *pfootprint++ = 0;
   *pfootprint++ = 0;
   *pfootprint++ = 0;
+#endif
 }
 
 funcptr_NS callback_NS; // non-secure callback function pointer
@@ -342,10 +347,10 @@ void SysTick_Handler(void)
   */
 void IAC_IRQHandler(void)
 {
-  uint32_t *pfootprint = (uint32_t*)(LOG_RAM_BASE_ADD+0x100);
+#if (NS_DATA_IMAGE_NUMBER == 1)
+  uint32_t *pfootprint = (uint32_t*)(LOG_RAM_BASE_ADD+0x200);
   *pfootprint = (uint32_t)pfootprint;
-
-  funcptr_NS callback_NS; // non-secure callback function pointer
+#endif
 
   if(pSecureError_Callback != (funcptr_NS)NULL)
   {

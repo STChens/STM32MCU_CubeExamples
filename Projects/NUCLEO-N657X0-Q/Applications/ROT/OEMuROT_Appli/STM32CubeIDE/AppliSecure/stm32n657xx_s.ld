@@ -30,9 +30,9 @@
 ******************************************************************************
 */
 CODE_S_ADDRESS = 0x34100400;     /* This define is updated automatically from OEMuROT_Boot project */
-CODE_S_SIZE = 0x10000;           /* This define is updated automatically from OEMuROT_Boot project */
-DATA_S_ADDRESS = 0x341e0000;     /* This define is updated automatically from OEMuROT_Boot project */
-DATA_S_SIZE = 0x10000;           /* This define is updated automatically from OEMuROT_Boot project */
+CODE_S_SIZE = 0x20000;           /* This define is updated automatically from OEMuROT_Boot project */
+DATA_S_ADDRESS = 0x34160000;     /* This define is updated automatically from OEMuROT_Boot project */
+DATA_S_SIZE = 0x20000;           /* This define is updated automatically from OEMuROT_Boot project */
 IMAGE_HEADER_SIZE = 0x400;       /* mcuboot header size */
 TRAILER_MAX_SIZE = 0x2000;       /* mcuboot trailer max size */
 

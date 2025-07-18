@@ -113,15 +113,32 @@ static void NS_DATA_Print_menu(void)
   */
 static void NS_DATA_Display(void)
 {
-  uint8_t *data;
-  data = (uint8_t*)(NS_DATA_ADDRESS);
+  uint32_t *data;
+  data = (uint32_t*)(NS_DATA_ADDRESS);
+  int i, size=512;
 
+
+  printf("Showing 32-bit memory content\r\n");
+  printf("Size\t\t: %d Bytes\r\n", size);
+  printf("Address\t: 0x%08X\r\n", (uint32_t)data);
+  size = size >> 4;
+  for (i=0; i<size; i++)
+  {
+	  printf("0x%08x : ", (uint32_t)data);
+	  printf("%08X ", *data++);
+	  printf("%08X ", *data++);
+	  printf("%08X ", *data++);
+	  printf("%08X \r\n", *data++);
+  }
+
+  /*
   printf("  -- NS Data: %08lx%08lx..%08lx%08lx\r\n\n",
                *((unsigned long *)(&data[0])),
                *((unsigned long *)(&data[4])),
                *((unsigned long *)(&data[32 - 8])),
                *((unsigned long *)(&data[32 - 4]))
               );
+              */
 }
 
 /**
