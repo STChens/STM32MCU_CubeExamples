@@ -188,7 +188,6 @@ void SystemInit(void)
 #else
   SCB->VTOR = INTVECT_START;
 #endif  /* USER_VECT_TAB_ADDRESS */
-  (void)SCB->VTOR;
 
   /* System configuration setup */
   RCC->APB4ENSR2 = RCC_APB4ENSR2_SYSCFGENS;
@@ -202,23 +201,14 @@ void SystemInit(void)
   SYSCFG->VDDIO5CCCR = 0x00000278UL; /* Octo-SPI domain compensation */
   SYSCFG->VDDCCCR    = 0x00000278UL; /* VDD domain compensation */
 
-  (void)SYSCFG->VDDIO2CCCR;
-  (void)SYSCFG->VDDIO3CCCR;
-  (void)SYSCFG->VDDIO4CCCR;
-  (void)SYSCFG->VDDIO5CCCR;
-  (void)SYSCFG->VDDCCCR;
-
   /* Set default Vector Table location after system reset or return from Standby */
   SYSCFG->INITSVTORCR = SCB->VTOR;
   __DSB();
   __ISB();
   (void) SYSCFG->INITSVTORCR;
 
-  /* Deactivate SYSCFG clock */
+/* Deactivate SYSCFG clock */
   RCC->APB4ENCR2 = RCC_APB4ENCR2_SYSCFGENC;
-  __DSB();
-  __ISB();
-  (void)RCC->APB4ENCR2;
 
   /* FPU settings ------------------------------------------------------------*/
 #if (__FPU_PRESENT == 1) && (__FPU_USED == 1)

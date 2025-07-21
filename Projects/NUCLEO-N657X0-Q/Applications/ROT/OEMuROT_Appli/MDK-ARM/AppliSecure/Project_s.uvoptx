@@ -22,7 +22,7 @@
   </DaveTm>
 
   <Target>
-    <TargetName>STM32N6570-DK_OEMuROT_Appli_Secure</TargetName>
+    <TargetName>Nucleo-N657X0_OEMuROT_Appli_Secure</TargetName>
     <ToolsetNumber>0x4</ToolsetNumber>
     <ToolsetName>ARM-ADS</ToolsetName>
     <TargetOption>
@@ -197,16 +197,16 @@
           <Type>0</Type>
           <LineNumber>298</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>873488024</Address>
+          <Address>0</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
+          <BreakIfRCount>0</BreakIfRCount>
           <Filename>&lt;1&gt;../../AppliSecure/Src/system_stm32n6xx_s.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\Project_s\../../AppliSecure/Src/system_stm32n6xx_s.c\298</Expression>
+          <Expression></Expression>
         </Bp>
         <Bp>
           <Number>4</Number>

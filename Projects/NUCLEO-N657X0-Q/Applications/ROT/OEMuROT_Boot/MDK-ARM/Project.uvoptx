@@ -22,7 +22,7 @@
   </DaveTm>
 
   <Target>
-    <TargetName>STM32N6570-DK_OEMuROT_Boot</TargetName>
+    <TargetName>Nucleo-N657X0_OEMuROT_Boot</TargetName>
     <ToolsetNumber>0x4</ToolsetNumber>
     <ToolsetName>ARM-ADS</ToolsetName>
     <TargetOption>

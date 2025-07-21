@@ -7,7 +7,7 @@
 
   <Targets>
     <Target>
-      <TargetName>STM32N6570-DK_OEMuROT_Appli_NonSecure</TargetName>
+      <TargetName>Nucleo-N657X0_OEMuROT_Appli_NonSecure</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
       <pCCUsed>6210000::V6.21::ARMCLANG</pCCUsed>
