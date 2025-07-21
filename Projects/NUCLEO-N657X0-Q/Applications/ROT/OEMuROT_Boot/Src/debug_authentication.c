@@ -22,6 +22,7 @@
 #include "bootutil/crypto/sha256.h"
 #include "low_level_otp.h"
 #include "debug_authentication.h"
+#include <stdio.h>
 
 /* Private defines -----------------------------------------------------------*/
 #define DEBUG_REQUEST_MESSAGE "OEDA"
@@ -341,7 +342,11 @@ static HAL_StatusTypeDef OTP_Get_Password_Hash(uint32_t* hash)
     /* Reverse endianness */
     if (hash != NULL)
     {
-      hash[i] = __REV(otp_value);
+      hash[i] = __REV(otp_value);      
+    }
+    else
+    {
+      printf("DA Password HASH[%d]: %08x\r\n", i, (otp_value));
     }
 
     if (otp_value != 0xFF)

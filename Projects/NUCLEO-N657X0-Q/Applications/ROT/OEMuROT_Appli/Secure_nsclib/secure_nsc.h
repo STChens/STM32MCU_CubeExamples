@@ -57,5 +57,5 @@ int32_t SECURE_EraseSector(uint32_t addr);
 int32_t SECURE_ProgramData(uint32_t addr, const void *data, uint32_t cnt);
 void SECURE_EnableDebug(uint32_t ns_only);
 void SECURE_GetDebugState(uint32_t *apunlock, BSEC_DebugCfgTypeDef *pDbgCfg, uint32_t *hdpl);
-
+void SECURE_Read_OTP(uint32_t wordIdx, int nbWords, uint32_t *outBuf);
 #endif /* SECURE_NSC_H */

@@ -808,7 +808,7 @@ static void test_menu(void)
 	printf("Show BSEC_DBGCR, BSEC_AP_UNLOCK --------------- s\r\n");
 	printf("Show current HDPL ----------------------------- h\r\n");
 	printf("Increment HDPL    ----------------------------- i\r\n");
-	printf("Exit    ----------------------------------------x\r\n");
+        printf("Exit    ----------------------------------------x\r\n");
 	printf("==================================================\r\n");
 
 	while( HAL_UART_Receive (&uart_device, (uint8_t *) &ch, 1, HAL_MAX_DELAY) != HAL_OK){};

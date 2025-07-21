@@ -119,7 +119,7 @@ void OTP_Lock(void)
     FLOW_CONTROL_STEP(uFlowProtectValue, FLOW_STEP_OTP_NVCNT_EN, FLOW_CTRL_OTP_NVCNT_EN);
 
     /* Lock DA password OTP */
-    for (i = 0; i < 4; i++)
+    for (i = 0; i < 8; i++)
     {
       if (HAL_BSEC_OTP_Lock(&sBsecHandler, OTP_DEBUG_AUTH_PASSWORD_HASH_NUMBER + i, HAL_BSEC_FUSE_RELOAD_LOCKED) != HAL_OK)
       {

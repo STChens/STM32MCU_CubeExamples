@@ -45,6 +45,11 @@ void *pSecureError_pData = NULL;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
+CMSE_NS_ENTRY void SECURE_Read_OTP(uint32_t wordIdx, int nbWords, uint32_t *outBuf)
+{
+  bsec_otp_read(wordIdx, nbWords, outBuf);
+}
+
 CMSE_NS_ENTRY void SECURE_EnableDebug(uint32_t ns_only)
 {
   open_full_debug(ns_only);

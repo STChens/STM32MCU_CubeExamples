@@ -35,6 +35,9 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private defines -----------------------------------------------------------*/
+#define SHA256_LEN_BYTES 0x20   /* SHA-256 hash length in bytes (32 bytes) */
+#define SHA256_LEN_WORDS 0x08   /* SHA-256 hash length in words (8 words) */
+#define OTP_DEBUG_AUTH_PASSWORD_HASH_NUMBER 292         /* OTP 292 - 299 : Debug authentication password hash */
 
 /* Enable print of boot time (obtained through DWT).
    DWT usage requires product state is not closed/locked.
@@ -173,8 +176,9 @@ void FW_APP_PrintMainMenu(void)
 {
   printf("\r\n=================== Main Menu ============================\r\n\n");
   printf("  Enable non-secure debug ------------------------------- d\r\n\n");
-	printf("  Enable full debug (s+ns) ------------------------------ f\r\n\n");
+  printf("  Enable full debug (s+ns) ------------------------------ f\r\n\n");
   printf("  Get debug enable state  ------------------------------- s\r\n\n");
+  printf("  Read DA OTP words       ------------------------------- o\r\n\n");
 #if (NS_DATA_IMAGE_NUMBER == 1)
   printf("  Non-Secure Data --------------------------------------- 1\r\n\n");
 #endif /* NS_DATA_IMAGE_NUMBER == 1 */
@@ -206,11 +210,25 @@ void FW_APP_Run(void)
     {
       switch (key)
       {
+        case 'o' :
+          {
+            uint32_t da_otp[SHA256_LEN_WORDS] = {0};
+            
+            printf("Read DA OTP fuse values\r\n");
+            printf("\t OTP word start index: %d\r\n",OTP_DEBUG_AUTH_PASSWORD_HASH_NUMBER);
+            printf("\t OTP number of words: %d\r\n", SHA256_LEN_WORDS);
+            SECURE_Read_OTP( OTP_DEBUG_AUTH_PASSWORD_HASH_NUMBER, SHA256_LEN_WORDS, &da_otp[0]);
+            printf("====================================\r\n");
+            printf("%08x %08x %08x %08x\r\n", da_otp[0], da_otp[1], da_otp[2], da_otp[3]);
+            printf("%08x %08x %08x %08x\r\n", da_otp[4], da_otp[5], da_otp[6], da_otp[7]);
+            printf("====================================\r\n");
+          }
+          break;
         case 'd' :
           printf("  Call NSC API to enable debug for Non-secure part \r\n\n");
           SECURE_EnableDebug(1);
           break;
-				case 'f' :
+        case 'f' :
           printf("  Call NSC API to enable full debug for S and NS part \r\n\n");
           SECURE_EnableDebug(0);
           break;
